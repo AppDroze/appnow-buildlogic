@@ -3,11 +3,45 @@
 **/build/
 **/.gradle/
 **/.kotlin/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 
-# IDE
+# IDE files
+.idea/
 **/.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.settings/
+.classpath
 **/.DS_Store
 **/.vscode/
 
 # Android
 **/local.properties
+**/captures/
+**/externalNativeBuild/
+**/output.json
+
+# Kotlin
+**/.kotlin/
+
+# Build outputs
+**/out/
+**/bin/
+
+# Logs
+*.log
+
+# OS generated files
+Thumbs.db
+.DS_Store
+
+# Version control
+.svn/
+
+# Temporary files
+*~
+.tmp
