@@ -21,12 +21,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             iosArm64()
             iosSimulatorArm64()
 
-            sourceSets.apply {
-                // keep minimal; consumers add their own deps
-                commonTest.dependencies {
-                    implementation(kotlin("test"))
-                }
-            }
+            // Consumers add their own dependencies and configure source sets as needed
         }
 
         extensions.configure<LibraryExtension> {

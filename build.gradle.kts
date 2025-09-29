@@ -8,17 +8,19 @@ tasks.register("cleanAll") {
 
 tasks.register("rebuildAll") {
     group = "workspace"
-    description = "Build both included builds"
+    description = "Publish catalog, then build convention plugins"
     dependsOn(
-        gradle.includedBuild("build-logic").task(":build"),
-        gradle.includedBuild("catalog").task(":generateCatalogAsToml")
+        // publish catalog so build-logic can resolve it from mavenLocal
+        gradle.includedBuild("catalog").task(":publishToMavenLocal"),
+        gradle.includedBuild("build-logic").task(":build")
     )
 }
 
 tasks.register("publishAllToMavenLocal") {
     group = "workspace"
+    description = "Publish plugins & catalog to mavenLocal"
     dependsOn(
-        gradle.includedBuild("build-logic").task(":publishToMavenLocal"),
-        gradle.includedBuild("catalog").task(":publishToMavenLocal")
+        gradle.includedBuild("catalog").task(":publishToMavenLocal"),
+        gradle.includedBuild("build-logic").task(":publishToMavenLocal")
     )
 }
