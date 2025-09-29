@@ -6,6 +6,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 class KmpLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -34,6 +36,11 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
                 targetCompatibility = JavaVersion.VERSION_17
             }
             buildFeatures { compose = false }
+        }
+
+        // Ensure Kotlin compiles with JVM 17 as well
+        tasks.withType(KotlinCompile::class.java).configureEach {
+            compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 }

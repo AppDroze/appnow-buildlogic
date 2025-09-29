@@ -5,6 +5,9 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 class AndroidAppConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -62,6 +65,14 @@ class AndroidAppConventionPlugin : Plugin<Project> {
             packaging {
                 resources.excludes += setOf("META-INF/AL2.0", "META-INF/LGPL2.1")
             }
+        }
+
+        // Kotlin toolchain and jvmTarget = 17 for app modules
+        extensions.configure(KotlinAndroidProjectExtension::class.java) {
+            jvmToolchain(17)
+        }
+        tasks.withType(KotlinCompile::class.java).configureEach {
+            compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 }
