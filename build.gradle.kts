@@ -24,3 +24,12 @@ tasks.register("publishAllToMavenLocal") {
         gradle.includedBuild("build-logic").task(":publishToMavenLocal")
     )
 }
+
+tasks.register("publishAll") {
+    group = "workspace"
+    description = "Publish catalog + plugins to the configured Maven repo"
+    dependsOn(
+        gradle.includedBuild("catalog").task(":publish"),
+        gradle.includedBuild("build-logic").task(":publish")
+    )
+}

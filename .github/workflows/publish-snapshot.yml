@@ -1,0 +1,44 @@
+name: Publish Snapshot
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set versions
+        id: v
+        run: |
+          echo "VERSION_NAME=0.1.0-SNAPSHOT" >> $GITHUB_OUTPUT
+          echo "CATALOG_VERSION=0.1.0-SNAPSHOT" >> $GITHUB_OUTPUT
+
+      - name: Publish Catalog & Plugins
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_URL: https://maven.pkg.github.com/${{ github.repository }}
+        run: |
+          ./gradlew \
+            -p catalog publish \
+            -PVERSION_NAME=${{ steps.v.outputs.VERSION_NAME }}
+
+          ./gradlew \
+            -p build-logic publish \
+            -PVERSION_NAME=${{ steps.v.outputs.VERSION_NAME }} \
+            -PCATALOG_VERSION=${{ steps.v.outputs.CATALOG_VERSION }}

@@ -50,6 +50,25 @@ gradlePlugin {
 }
 
 publishing {
+    repositories {
+        maven {
+            val publishUrl = findProperty("PUBLISH_URL") as String? 
+                ?: System.getenv("PUBLISH_URL") 
+                ?: "https://repo1.maven.org/maven2"
+            url = uri(publishUrl)
+
+            credentials {
+                // For GH Packages, Gradle will pick these up from GitHub Actions automatically
+                username = findProperty("MAVEN_USER") as String?
+                    ?: System.getenv("GITHUB_ACTOR") ?: ""
+                password = findProperty("MAVEN_TOKEN") as String?
+                    ?: System.getenv("GITHUB_TOKEN") ?: ""
+            }
+        }
+        // keep local for quick tests:
+        mavenLocal()
+    }
+    
     publications.withType<MavenPublication>().configureEach {
         pom {
             name.set("AppNow Build Logic")
