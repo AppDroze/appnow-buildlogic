@@ -1,24 +1,43 @@
 tasks.register("cleanAll") {
     group = "workspace"
     dependsOn(
-        gradle.includedBuild("build-logic").task(":clean"),
-        // catalog has version-catalog plugin only - no build outputs to clean
+        gradle.includedBuild("build-logic").task(":clean")
+        // catalog doesn't have a clean task (version-catalog plugin only)
     )
 }
 
 tasks.register("rebuildAll") {
     group = "workspace"
-    description = "Publish catalog, then build convention plugins"
+    description = "Publish catalog, then build and check convention plugins"
     dependsOn(
         // publish catalog so build-logic can resolve it from mavenLocal
         gradle.includedBuild("catalog").task(":publishToMavenLocal"),
-        gradle.includedBuild("build-logic").task(":build")
+        gradle.includedBuild("build-logic").task(":build"),
+        gradle.includedBuild("build-logic").task(":check")
     )
 }
 
 tasks.register("publishAllToMavenLocal") {
     group = "workspace"
     description = "Publish plugins & catalog to mavenLocal"
+    dependsOn(
+        gradle.includedBuild("catalog").task(":publishToMavenLocal"),
+        gradle.includedBuild("build-logic").task(":publishToMavenLocal")
+    )
+}
+
+tasks.register("buildAll") {
+    group = "workspace"
+    description = "Fast build without publishing (catalog validation + plugin build)"
+    dependsOn(
+        gradle.includedBuild("catalog").task(":generateCatalogAsToml"),
+        gradle.includedBuild("build-logic").task(":build")
+    )
+}
+
+tasks.register("smokeLocal") {
+    group = "workspace"
+    description = "Publish to mavenLocal for local testing"
     dependsOn(
         gradle.includedBuild("catalog").task(":publishToMavenLocal"),
         gradle.includedBuild("build-logic").task(":publishToMavenLocal")
