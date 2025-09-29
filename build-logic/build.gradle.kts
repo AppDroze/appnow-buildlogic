@@ -14,6 +14,12 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 dependencies {
     implementation(buildlibs.kotlin.gradle.plugin)
     implementation(buildlibs.android.gradle.plugin)

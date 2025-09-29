@@ -30,8 +30,17 @@ Now consumer build.gradle.kts can:
 ```kotlin
 plugins {
   id("appnow.kmp.library")
-  id("appnow.kmp.compose") 
+  id("appnow.kmp.compose")     // enables Compose, but you add deps
   id("appnow.android.app")
+}
+
+// For Compose projects, add your own dependencies:
+dependencies {
+  implementation(compose.runtime)
+  implementation(compose.foundation)
+  implementation(compose.material3)
+  implementation(compose.ui)
+  implementation(compose.components.resources)
 }
 ```
 

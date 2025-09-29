@@ -15,6 +15,13 @@ class AndroidAppConventionPlugin : Plugin<Project> {
         val minSdkVersion     = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24)
         val targetSdkVersion  = providers.gradleProperty("android.targetSdk").map(String::toInt).orElse(36)
 
+        // Compatibility check - fail early if consumer uses unsupported SDK versions
+        val minAllowed = 24
+        check(minSdkVersion.get() >= minAllowed) {
+            "android.minSdk=${minSdkVersion.get()} is below supported minimum ($minAllowed). " +
+            "Override in your gradle.properties."
+        }
+
         val appId = providers.gradleProperty("app.applicationId").orElse("com.example.app")
         val appVersionCode   = providers.gradleProperty("app.versionCode").map(String::toInt).orElse(1)
         val appVersionName   = providers.gradleProperty("app.versionName").orElse("1.0.0")
