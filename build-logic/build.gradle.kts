@@ -46,6 +46,12 @@ gradlePlugin {
             displayName = "AppNow Android App Convention"
             description = "Configures Android application defaults for AppNow"
         }
+        register("appnowDoctor") {
+            id = "appnow.doctor"
+            implementationClass = "appnow.buildlogic.DoctorConventionPlugin"
+            displayName = "AppNow Build Doctor"
+            description = "Diagnose AppNow build configuration and plugin versions"
+        }
     }
 }
 
