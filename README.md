@@ -14,6 +14,9 @@ Open the **workspace root** in Android Studio; you'll see both as "Included buil
 
 # Check project structure  
 ./gradlew -q projects
+
+# Check current versions (no Gradle needed)
+awk -F= '/^(VERSION_NAME|CATALOG_VERSION)=/{print $1": "$2}' build-config.properties
 ```
 
 ## How consumers use this

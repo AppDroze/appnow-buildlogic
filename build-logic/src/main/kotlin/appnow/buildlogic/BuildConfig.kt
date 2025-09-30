@@ -19,8 +19,8 @@ object BuildConfig {
             configFile.inputStream().use { properties.load(it) }
         } else {
             // Fallback to default values if config file doesn't exist
-            properties.setProperty("VERSION_NAME", "0.2.5")
-            properties.setProperty("CATALOG_VERSION", "0.2.5")
+            properties.setProperty("VERSION_NAME", "0.3.0")
+            properties.setProperty("CATALOG_VERSION", "0.3.0")
             properties.setProperty("android.compileSdk", "36")
             properties.setProperty("android.minSdk", "24")
             properties.setProperty("android.targetSdk", "36")

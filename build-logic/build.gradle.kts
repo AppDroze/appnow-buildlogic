@@ -1,26 +1,22 @@
+import java.util.Properties
+
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
     `maven-publish`
 }
 
-import java.util.Properties
-
-// Load centralized configuration
-apply(from = "../build-config.gradle.kts")
-
 group = providers.gradleProperty("GROUP").getOrElse("com.appnow.buildlogic")
 
-// Load version from centralized configuration
-// Priority: 1) Gradle property, 2) Environment variable, 3) build-config.properties, 4) fallback
-val configFile = file("../build-config.properties")
-val properties = Properties()
-if (configFile.exists()) {
-    configFile.inputStream().use { properties.load(it) }
+// Version precedence: ENV → -P → build-config.properties → default
+val cfgFile = rootDir.resolve("..").resolve("build-config.properties")
+val props = Properties().apply {
+    if (cfgFile.exists()) cfgFile.inputStream().use { load(it) }
 }
-version = providers.gradleProperty("VERSION_NAME")
-    .orElse(providers.environmentVariable("VERSION_NAME"))
-    .getOrElse(properties.getProperty("VERSION_NAME", "0.2.5"))
+version = providers.environmentVariable("VERSION_NAME")
+    .orElse(providers.gradleProperty("VERSION_NAME"))
+    .orElse(props.getProperty("VERSION_NAME") ?: "")
+    .getOrElse("0.3.0")
 
 repositories {
     mavenLocal()
@@ -30,9 +26,7 @@ repositories {
 }
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
+    toolchain { languageVersion.set(JavaLanguageVersion.of(17)) }
 }
 
 dependencies {
@@ -72,26 +66,21 @@ gradlePlugin {
 
 publishing {
     repositories {
-        // Only add remote repo when PUBLISH_URL is explicitly set
-        val publishUrl = findProperty("PUBLISH_URL") as String? 
+        val publishUrl = (findProperty("PUBLISH_URL") as String?)
             ?: System.getenv("PUBLISH_URL")
-        
         if (publishUrl != null) {
             maven {
                 url = uri(publishUrl)
                 credentials {
-                    // For GH Packages, Gradle will pick these up from GitHub Actions automatically
-                    username = findProperty("MAVEN_USER") as String?
-                        ?: System.getenv("GITHUB_ACTOR") ?: ""
-                    password = findProperty("MAVEN_TOKEN") as String?
-                        ?: System.getenv("GITHUB_TOKEN") ?: ""
+                    username = (findProperty("MAVEN_USER") as String?)
+                        ?: System.getenv("GITHUB_ACTOR").orEmpty()
+                    password = (findProperty("MAVEN_TOKEN") as String?)
+                        ?: System.getenv("GITHUB_TOKEN").orEmpty()
                 }
             }
         }
-        // keep local for quick tests:
         mavenLocal()
     }
-    
     publications.withType<MavenPublication>().configureEach {
         pom {
             name.set("AppNow Build Logic")

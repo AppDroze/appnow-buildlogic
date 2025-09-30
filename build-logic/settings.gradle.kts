@@ -1,11 +1,11 @@
+import java.util.Properties
+
 pluginManagement {
     repositories {
         mavenLocal()
         gradlePluginPortal()
         google()
         mavenCentral()
-        // If you'll use GH Packages for the catalog, add it here too.
-        // maven { url = uri("https://maven.pkg.github.com/<org>/<repo>") ; credentials { ... } }
     }
 }
 
@@ -16,20 +16,29 @@ dependencyResolutionManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
-        // Same note as above for GH Packages if needed
     }
     versionCatalogs {
-        val catVer = providers.gradleProperty("CATALOG_VERSION")
-            .orElse(providers.environmentVariable("CATALOG_VERSION"))
-            .getOrElse("0.0.0-LOCAL")
-
-        // Prefer local catalog file when building inside the mono-repo/composite
-        val localCatalog = file("../catalog/gradle/libs.versions.toml")
         create("buildlibs") {
-            if (providers.gradleProperty("BUILDLOGIC_USE_LOCAL_CATALOG").orNull == "true" || localCatalog.exists()) {
-                from(files(localCatalog))
+            // Resolve CATALOG_VERSION with precedence: ENV -> -P -> build-config.properties -> default
+            val cfgFile = rootDir.resolve("..").resolve("build-config.properties")
+            val props = Properties().apply {
+                if (cfgFile.exists()) cfgFile.inputStream().use { load(it) }
+            }
+            val catVer = providers.environmentVariable("CATALOG_VERSION")
+                .orElse(providers.gradleProperty("CATALOG_VERSION"))
+                .orElse(props.getProperty("CATALOG_VERSION") ?: "")
+                .getOrElse("0.3.0")
+
+            // Workspace-friendly fallback: if local TOML exists, use it; otherwise use the published GAV
+            val forcePublished = (System.getenv("APPNOW_FORCE_PUBLISHED") ?: "0") == "1"
+            val localToml = rootDir.resolve("..").resolve("catalog/gradle/libs.versions.toml")
+
+            if (!forcePublished && localToml.exists()) {
+                from(files(localToml))
+                println("🔎 build-logic: using local catalog TOML at $localToml")
             } else {
                 from("com.appnow.build:appnow-catalog:$catVer")
+                println("🔎 build-logic: using published catalog GAV com.appnow.build:appnow-catalog:$catVer")
             }
         }
     }
