@@ -21,10 +21,6 @@ jobs:
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Publish catalog to mavenLocal
-        run: |
-          ./gradlew :catalog:publishToMavenLocal
-
       - name: Build and validate
         run: |
-          ./gradlew :catalog:generateCatalogAsToml :build-logic:build :build-logic:check
+          ./gradlew :catalog:generateCatalogAsToml :build-logic:build :build-logic:check -PBUILDLOGIC_USE_LOCAL_CATALOG=true

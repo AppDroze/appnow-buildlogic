@@ -19,9 +19,16 @@ dependencyResolutionManagement {
         // Same note as above for GH Packages if needed
     }
     versionCatalogs {
-        val catVer = providers.gradleProperty("CATALOG_VERSION").getOrElse("0.2.0")
+        val catVer = providers.gradleProperty("CATALOG_VERSION").getOrElse("0.0.0-LOCAL")
+
+        // Prefer local catalog file when building inside the mono-repo/composite
+        val localCatalog = file("../catalog/gradle/libs.versions.toml")
         create("buildlibs") {
-            from("com.appnow.build:appnow-catalog:$catVer")
+            if (providers.gradleProperty("BUILDLOGIC_USE_LOCAL_CATALOG").orNull == "true" || localCatalog.exists()) {
+                from(files(localCatalog))
+            } else {
+                from("com.appnow.build:appnow-catalog:$catVer")
+            }
         }
     }
 }
