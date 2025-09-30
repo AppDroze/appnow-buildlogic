@@ -9,12 +9,14 @@ import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
-
 class AndroidAppConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("com.android.application")
         pluginManager.apply("org.jetbrains.kotlin.android")
 
+        // Load centralized configuration
+        val config = BuildConfig.load(this)
+        
         // Require SDK properties - fail with helpful error if missing
         val compileSdkProp = providers.gradleProperty("android.compileSdk").orNull
         val minSdkProp = providers.gradleProperty("android.minSdk").orNull
@@ -24,9 +26,9 @@ class AndroidAppConventionPlugin : Plugin<Project> {
             throw GradleException("""
                 Missing required Android SDK properties. Please add to your gradle.properties:
                 
-                android.compileSdk=36
-                android.minSdk=24
-                android.targetSdk=36
+                android.compileSdk=${config.getProperty("android.compileSdk", "36")}
+                android.minSdk=${config.getProperty("android.minSdk", "24")}
+                android.targetSdk=${config.getProperty("android.targetSdk", "36")}
                 
                 These properties are required by the appnow.android.app convention plugin.
             """.trimIndent())
@@ -37,7 +39,7 @@ class AndroidAppConventionPlugin : Plugin<Project> {
         val targetSdkVersion = targetSdkProp.toInt()
 
         // Compatibility check - fail early if consumer uses unsupported SDK versions
-        val minAllowed = 24
+        val minAllowed = BuildConfig.getIntValue(this, "MIN_SUPPORTED_MIN_SDK", 24)
         if (minSdkVersion < minAllowed) {
             throw GradleException("""
                 android.minSdk=$minSdkVersion is below supported minimum ($minAllowed).

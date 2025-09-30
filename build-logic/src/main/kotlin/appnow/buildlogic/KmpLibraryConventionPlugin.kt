@@ -9,7 +9,6 @@ import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 class KmpLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("org.jetbrains.kotlin.multiplatform")
@@ -23,8 +22,8 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             throw GradleException("""
                 Missing required Android SDK properties. Please add to your gradle.properties:
                 
-                android.compileSdk=36
-                android.minSdk=24
+                android.compileSdk=${BuildConfig.getValue(this, "android.compileSdk", "36")}
+                android.minSdk=${BuildConfig.getValue(this, "android.minSdk", "24")}
                 
                 These properties are required by the appnow.kmp.library convention plugin.
             """.trimIndent())

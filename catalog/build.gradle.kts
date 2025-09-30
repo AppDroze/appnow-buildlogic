@@ -4,8 +4,11 @@ plugins {
     base // adds the standard `clean` task
 }
 
+// Load centralized configuration
+apply(from = "../build-config.gradle.kts")
+
 group = providers.gradleProperty("GROUP").getOrElse("com.appnow.build")
-version = providers.gradleProperty("VERSION_NAME").getOrElse("0.2.1")
+version = providers.gradleProperty("VERSION_NAME").orElse(extra["appnow.versionName"] as String)
 
 catalog {
     versionCatalog {

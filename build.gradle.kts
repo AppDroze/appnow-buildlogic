@@ -1,3 +1,6 @@
+// Load centralized configuration
+apply(from = "build-config.gradle.kts")
+
 // Handy handles
 val BL  = gradle.includedBuild("build-logic")
 val CAT = gradle.includedBuild("catalog")
@@ -48,16 +51,19 @@ tasks.register("info") {
     group = "workspace"
     description = "Show current build/publish versions"
     doLast {
-        // Read from included builds
-        val catalogVersion = gradle.includedBuild("catalog").projectDir.resolve("gradle.properties").readText().let { content ->
-            content.lines().find { it.startsWith("VERSION_NAME=") }?.substringAfter("=") ?: "0.2.1"
+        val configFile = file("build-config.properties")
+        val properties = java.util.Properties()
+        
+        if (configFile.exists()) {
+            configFile.inputStream().use { properties.load(it) }
         }
-        val pluginVersion = gradle.includedBuild("build-logic").projectDir.resolve("gradle.properties").readText().let { content ->
-            content.lines().find { it.startsWith("VERSION_NAME=") }?.substringAfter("=") ?: "0.2.1"
-        }
+        
         println("📦 AppNow Build Logic Info")
-        println("  Catalog Version: $catalogVersion")
-        println("  Plugin Version:  $pluginVersion")
+        println("  Catalog Version: ${properties.getProperty("CATALOG_VERSION", "0.2.1")}")
+        println("  Plugin Version:  ${properties.getProperty("VERSION_NAME", "0.2.1")}")
+        println("  Compile SDK:     ${properties.getProperty("android.compileSdk", "36")}")
+        println("  Min SDK:         ${properties.getProperty("android.minSdk", "24")}")
+        println("  Target SDK:      ${properties.getProperty("android.targetSdk", "36")}")
         println("  Publish URL:     ${findProperty("PUBLISH_URL") ?: System.getenv("PUBLISH_URL") ?: "not set (mavenLocal only)"}")
     }
 }
