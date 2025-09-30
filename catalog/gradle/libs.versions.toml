@@ -1,34 +1,75 @@
 [versions]
+# Core toolchain
 kotlin = "2.2.20"
 agp = "8.11.2"
+
+# UI / Compose MPP
 compose = "1.9.0"
-activity-compose = "1.9.2"
+
+# AndroidX
+androidx-activity = "1.9.2"        # (you had 1.11.0 earlier; 1.9.2 is widely used/stable)
+androidx-lifecycle = "2.9.4"       # JetBrains' KMP-ready Lifecycle artifacts
+
+# KotlinX
+coroutines = "1.10.2"
+
+# Ecosystem
+decompose = "3.3.0"
+koin = "4.1.1"
+koin-compose = "4.1.1"
+
+# AppNow (internal) — keep but optional until you publish these
+appnow-design = "0.1.0"
 
 [plugins]
-# Kotlin plugins
+# Kotlin / Android / Compose plugins
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-android       = { id = "org.jetbrains.kotlin.android",       version.ref = "kotlin" }
 kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
-# Android plugins  
-android-application = { id = "com.android.application", version.ref = "agp" }
-android-library = { id = "com.android.library", version.ref = "agp" }
+android-application  = { id = "com.android.application", version.ref = "agp" }
+android-library      = { id = "com.android.library",     version.ref = "agp" }
+jetbrains-compose    = { id = "org.jetbrains.compose",   version.ref = "compose" }
 
-# Compose plugins
-jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+# Our convention plugins (no versions here – they're applied by ID via build-logic)
+convention-kmp-library = { id = "appnow.kmp.library" }
+convention-android-app = { id = "appnow.android.app" }
+convention-kmp-compose = { id = "appnow.kmp.compose" }
 
 [libraries]
-# Gradle plugins (for build-logic)
-kotlin-gradle-plugin  = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+# Gradle plugin artifacts (used by build-logic project)
+kotlin-gradle-plugin  = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin",   version.ref = "kotlin" }
+android-gradle-plugin = { module = "com.android.tools.build:gradle",              version.ref = "agp" }
 compose-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose" }
 
-# Android libraries
-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
-
-# Compose libraries (explicit aliases for when compose.* accessors aren't available)
-compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
-compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
-compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
+# Compose MPP (explicit aliases; you can also use compose.* accessors when org.jetbrains.compose plugin is applied)
+compose-runtime              = { module = "org.jetbrains.compose.runtime:runtime",                 version.ref = "compose" }
+compose-foundation           = { module = "org.jetbrains.compose.foundation:foundation",           version.ref = "compose" }
+compose-material3            = { module = "org.jetbrains.compose.material3:material3",            version.ref = "compose" }
+compose-ui                   = { module = "org.jetbrains.compose.ui:ui",                           version.ref = "compose" }
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
+
+# AndroidX
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+
+# Lifecycle (KMP-ready artifacts live under org.jetbrains.androidx.*)
+lifecycle-runtime-compose   = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose",   version.ref = "androidx-lifecycle" }
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
+
+# Splashscreen (Android-only)
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.0.1" }
+
+# KotlinX
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+
+# Decompose
+decompose-core              = { module = "com.arkivanov.decompose:decompose",          version.ref = "decompose" }
+decompose-extensions-compose= { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
+
+# Koin (4.x has Compose MPP support)
+koin-core    = { module = "io.insert-koin:koin-core",    version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin-compose" }
+
+# AppNow design (placeholder coordinates if/when you publish them)
+appnow-design-core-ui     = { module = "appnow.design:core-ui",     version.ref = "appnow-design" }
+appnow-design-core-design = { module = "appnow.design:core-design", version.ref = "appnow-design" }

@@ -13,6 +13,12 @@ catalog {
     }
 }
 
+tasks.register("verifyCatalog") {
+    group = "verification"
+    description = "Validates that the version catalog can be generated"
+    dependsOn("generateCatalogAsToml")
+}
+
 publishing {
     repositories {
         // Only add remote repo when PUBLISH_URL is explicitly set
