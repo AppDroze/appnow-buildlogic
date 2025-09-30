@@ -12,12 +12,15 @@ apply(from = "../build-config.gradle.kts")
 group = providers.gradleProperty("GROUP").getOrElse("com.appnow.buildlogic")
 
 // Load version from centralized configuration
+// Priority: 1) Gradle property, 2) Environment variable, 3) build-config.properties, 4) fallback
 val configFile = file("../build-config.properties")
 val properties = Properties()
 if (configFile.exists()) {
     configFile.inputStream().use { properties.load(it) }
 }
-version = providers.gradleProperty("VERSION_NAME").getOrElse(properties.getProperty("VERSION_NAME", "0.2.3"))
+version = providers.gradleProperty("VERSION_NAME")
+    .orElse(providers.environmentVariable("VERSION_NAME"))
+    .getOrElse(properties.getProperty("VERSION_NAME", "0.2.3"))
 
 repositories {
     mavenLocal()
