@@ -22,28 +22,31 @@ jobs:
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build (fail fast)
-        run: |
-          ./gradlew -p catalog build
-          ./gradlew -p build-logic build
-
       - name: Set versions
         id: v
         run: |
           echo "VERSION_NAME=0.1.0-SNAPSHOT" >> $GITHUB_OUTPUT
           echo "CATALOG_VERSION=0.1.0-SNAPSHOT" >> $GITHUB_OUTPUT
 
-      - name: Publish Catalog & Plugins
+      - name: Build and Publish Catalog
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLISH_URL: https://maven.pkg.github.com/${{ github.repository }}
         run: |
           ./gradlew \
+            -p catalog build \
             -p catalog publish \
             -PVERSION_NAME=${{ steps.v.outputs.VERSION_NAME }}
 
+      - name: Build and Publish Plugins
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_URL: https://maven.pkg.github.com/${{ github.repository }}
+        run: |
           ./gradlew \
+            -p build-logic build \
             -p build-logic publish \
             -PVERSION_NAME=${{ steps.v.outputs.VERSION_NAME }} \
             -PCATALOG_VERSION=${{ steps.v.outputs.CATALOG_VERSION }}
