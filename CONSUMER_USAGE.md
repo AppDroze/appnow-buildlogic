@@ -105,7 +105,7 @@ For local development with `mavenLocal()`, publish from the build-logic workspac
 
 ```bash
 # In appnow-buildlogic directory
-./gradlew publishAllToMavenLocal
+./gradlew publishLocal
 ```
 
 Then use version `0.1.0` in your consumer projects.
