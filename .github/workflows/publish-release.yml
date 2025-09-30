@@ -23,6 +23,11 @@ jobs:
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Build (fail fast)
+        run: |
+          ./gradlew -p catalog build
+          ./gradlew -p build-logic build
+
       - name: Extract version from tag
         id: v
         run: |
