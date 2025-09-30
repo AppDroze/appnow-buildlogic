@@ -24,7 +24,7 @@ dependencyResolutionManagement {
     
     versionCatalogs {
         create("libs") {
-            from("com.appnow.build:appnow-catalog:0.2.3") // Check build-config.properties for current version
+            from("com.appnow.build:appnow-catalog:0.2.5") // Check build-config.properties for current version
         }
     }
 }
@@ -60,13 +60,13 @@ In your module's `build.gradle.kts`:
 ```kotlin
 plugins {
     // For KMP libraries
-    id("appnow.kmp.library") version "0.2.3" // Check build-config.properties for current version
+    id("appnow.kmp.library") version "0.2.5" // Check build-config.properties for current version
     
     // For KMP libraries with Compose 
-    id("appnow.kmp.compose") version "0.2.3" // Check build-config.properties for current version
+    id("appnow.kmp.compose") version "0.2.5" // Check build-config.properties for current version
     
     // For Android applications
-    id("appnow.android.app") version "0.2.3" // Check build-config.properties for current version
+    id("appnow.android.app") version "0.2.5" // Check build-config.properties for current version
 }
 
 // For Compose projects, add your dependencies:

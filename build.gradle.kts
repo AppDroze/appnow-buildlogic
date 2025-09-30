@@ -59,8 +59,8 @@ tasks.register("info") {
         }
         
         println("📦 AppNow Build Logic Info")
-        println("  Catalog Version: ${System.getenv("CATALOG_VERSION") ?: properties.getProperty("CATALOG_VERSION", "0.2.3")}")
-        println("  Plugin Version:  ${System.getenv("VERSION_NAME") ?: properties.getProperty("VERSION_NAME", "0.2.3")}")
+        println("  Catalog Version: ${System.getenv("CATALOG_VERSION") ?: properties.getProperty("CATALOG_VERSION", "0.2.5")}")
+        println("  Plugin Version:  ${System.getenv("VERSION_NAME") ?: properties.getProperty("VERSION_NAME", "0.2.5")}")
         println("  Compile SDK:     ${properties.getProperty("android.compileSdk", "36")}")
         println("  Min SDK:         ${properties.getProperty("android.minSdk", "24")}")
         println("  Target SDK:      ${properties.getProperty("android.targetSdk", "36")}")

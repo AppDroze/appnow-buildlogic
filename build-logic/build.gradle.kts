@@ -20,7 +20,7 @@ if (configFile.exists()) {
 }
 version = providers.gradleProperty("VERSION_NAME")
     .orElse(providers.environmentVariable("VERSION_NAME"))
-    .getOrElse(properties.getProperty("VERSION_NAME", "0.2.3"))
+    .getOrElse(properties.getProperty("VERSION_NAME", "0.2.5"))
 
 repositories {
     mavenLocal()

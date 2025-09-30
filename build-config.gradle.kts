@@ -14,8 +14,8 @@ fun loadBuildConfig(): Properties {
         configFile.inputStream().use { properties.load(it) }
     } else {
         // Fallback to default values if config file doesn't exist
-        properties.setProperty("VERSION_NAME", "0.2.3")
-        properties.setProperty("CATALOG_VERSION", "0.2.3")
+        properties.setProperty("VERSION_NAME", "0.2.5")
+        properties.setProperty("CATALOG_VERSION", "0.2.5")
         properties.setProperty("android.compileSdk", "36")
         properties.setProperty("android.minSdk", "24")
         properties.setProperty("android.targetSdk", "36")
@@ -48,8 +48,8 @@ fun getConfigValueAsInt(key: String, fallback: Int = 0): Int {
 }
 
 // Extension properties for easy access
-extra["appnow.versionName"] = getConfigValue("VERSION_NAME", "0.2.3")
-extra["appnow.catalogVersion"] = getConfigValue("CATALOG_VERSION", "0.2.3")
+extra["appnow.versionName"] = getConfigValue("VERSION_NAME", "0.2.5")
+extra["appnow.catalogVersion"] = getConfigValue("CATALOG_VERSION", "0.2.5")
 extra["appnow.compileSdk"] = getConfigValueAsInt("android.compileSdk", 36)
 extra["appnow.minSdk"] = getConfigValueAsInt("android.minSdk", 24)
 extra["appnow.targetSdk"] = getConfigValueAsInt("android.targetSdk", 36)
