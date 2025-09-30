@@ -37,10 +37,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLISH_URL: https://maven.pkg.github.com/${{ github.repository }}
         run: |
-          ./gradlew \
-            -p catalog build \
-            -p catalog publish \
-            -PVERSION_NAME=${{ steps.v.outputs.VERSION_NAME }}
+          ./gradlew -p catalog build publish -PVERSION_NAME=${{ steps.v.outputs.VERSION_NAME }}
 
       - name: Build and Publish Plugins
         env:
@@ -48,8 +45,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLISH_URL: https://maven.pkg.github.com/${{ github.repository }}
         run: |
-          ./gradlew \
-            -p build-logic build \
-            -p build-logic publish \
-            -PVERSION_NAME=${{ steps.v.outputs.VERSION_NAME }} \
-            -PCATALOG_VERSION=${{ steps.v.outputs.CATALOG_VERSION }}
+          ./gradlew -p build-logic build publish -PVERSION_NAME=${{ steps.v.outputs.VERSION_NAME }} -PCATALOG_VERSION=${{ steps.v.outputs.CATALOG_VERSION }}

@@ -23,7 +23,7 @@ jobs:
 
       - name: Build and validate
         run: |
-          ./gradlew \
-            :catalog:generateCatalogAsToml \
-            :build-logic:build \
-            :build-logic:check
+          # First publish catalog to mavenLocal so build-logic can resolve it
+          ./gradlew :catalog:publishToMavenLocal
+          # Then build and validate
+          ./gradlew :catalog:generateCatalogAsToml :build-logic:build :build-logic:check
