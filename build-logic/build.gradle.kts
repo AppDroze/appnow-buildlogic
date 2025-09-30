@@ -4,11 +4,20 @@ plugins {
     `maven-publish`
 }
 
+import java.util.Properties
+
 // Load centralized configuration
 apply(from = "../build-config.gradle.kts")
 
 group = providers.gradleProperty("GROUP").getOrElse("com.appnow.buildlogic")
-version = providers.gradleProperty("VERSION_NAME").orElse(extra["appnow.versionName"] as String)
+
+// Load version from centralized configuration
+val configFile = file("../build-config.properties")
+val properties = Properties()
+if (configFile.exists()) {
+    configFile.inputStream().use { properties.load(it) }
+}
+version = providers.gradleProperty("VERSION_NAME").getOrElse(properties.getProperty("VERSION_NAME", "0.2.3"))
 
 repositories {
     mavenLocal()
