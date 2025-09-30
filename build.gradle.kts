@@ -1,8 +1,8 @@
 tasks.register("cleanAll") {
     group = "workspace"
     dependsOn(
-        gradle.includedBuild("build-logic").task(":clean")
-        // catalog doesn't have a clean task (version-catalog plugin only)
+        gradle.includedBuild("build-logic").task(":clean"),
+        gradle.includedBuild("catalog").task(":clean")
     )
 }
 

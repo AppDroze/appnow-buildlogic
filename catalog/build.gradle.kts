@@ -1,6 +1,7 @@
 plugins {
     `version-catalog`
     `maven-publish`
+    base // adds the standard `clean` task
 }
 
 group = providers.gradleProperty("GROUP").getOrElse("com.appnow.build")
