@@ -47,12 +47,12 @@ dependencies {
 ### B) Published plugins
 1. Add plugin descriptors to build-logic/build.gradle.kts
 2. Publish: `./gradlew :build-logic:publishToMavenLocal`
-3. Use with versions: `id("appnow.kmp.library") version "0.2.0"`
+3. Use with versions: `id("appnow.kmp.library") version "0.2.1"`
 
 ### C) Published version catalog
 1. Add publishing to catalog/build.gradle.kts 
 2. Publish: `./gradlew :catalog:publishToMavenLocal`
-3. Use: `from("com.appnow.build:appnow-catalog:0.2.0")`
+3. Use: `from("com.appnow.build:appnow-catalog:0.2.1")`
 
 ## Structure
 ```

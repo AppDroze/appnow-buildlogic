@@ -50,10 +50,10 @@ tasks.register("info") {
     doLast {
         // Read from included builds
         val catalogVersion = gradle.includedBuild("catalog").projectDir.resolve("gradle.properties").readText().let { content ->
-            content.lines().find { it.startsWith("VERSION_NAME=") }?.substringAfter("=") ?: "0.2.0"
+            content.lines().find { it.startsWith("VERSION_NAME=") }?.substringAfter("=") ?: "0.2.1"
         }
         val pluginVersion = gradle.includedBuild("build-logic").projectDir.resolve("gradle.properties").readText().let { content ->
-            content.lines().find { it.startsWith("VERSION_NAME=") }?.substringAfter("=") ?: "0.2.0"
+            content.lines().find { it.startsWith("VERSION_NAME=") }?.substringAfter("=") ?: "0.2.1"
         }
         println("📦 AppNow Build Logic Info")
         println("  Catalog Version: $catalogVersion")

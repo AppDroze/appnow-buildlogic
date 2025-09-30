@@ -5,7 +5,7 @@ plugins {
 }
 
 group = providers.gradleProperty("GROUP").getOrElse("com.appnow.build")
-version = providers.gradleProperty("VERSION_NAME").getOrElse("0.2.0")
+version = providers.gradleProperty("VERSION_NAME").getOrElse("0.2.1")
 
 catalog {
     versionCatalog {
