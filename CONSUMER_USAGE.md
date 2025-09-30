@@ -24,7 +24,7 @@ dependencyResolutionManagement {
     
     versionCatalogs {
         create("libs") {
-            from("com.appnow.build:appnow-catalog:0.2.1") // or 0.2.1-SNAPSHOT
+            from("com.appnow.build:appnow-catalog:0.2.3") // or 0.2.3-SNAPSHOT
         }
     }
 }
@@ -60,13 +60,13 @@ In your module's `build.gradle.kts`:
 ```kotlin
 plugins {
     // For KMP libraries
-    id("appnow.kmp.library") version "0.2.1"
+    id("appnow.kmp.library") version "0.2.3"
     
     // For KMP libraries with Compose 
-    id("appnow.kmp.compose") version "0.2.1"
+    id("appnow.kmp.compose") version "0.2.3"
     
     // For Android applications
-    id("appnow.android.app") version "0.2.1"
+    id("appnow.android.app") version "0.2.3"
 }
 
 // For Compose projects, add your dependencies:
@@ -108,13 +108,13 @@ For local development with `mavenLocal()`, publish from the build-logic workspac
 ./gradlew publishLocal
 ```
 
-Then use version `0.2.1` in your consumer projects.
+Then use version `0.2.3` in your consumer projects.
 
 ### 6. Available Versions
 
-- **Releases**: `0.2.1` (from GitHub releases/tags)
-- **Snapshots**: `0.2.1-SNAPSHOT` (from main branch pushes)
-- **Local**: `0.2.1` (from local publishing)
+- **Releases**: `0.2.3` (from GitHub releases/tags)
+- **Snapshots**: `0.2.3-SNAPSHOT` (from main branch pushes)
+- **Local**: `0.2.3` (from local publishing)
 
 ### 7. Authentication
 

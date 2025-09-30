@@ -48,8 +48,8 @@ fun getConfigValueAsInt(key: String, fallback: Int = 0): Int {
 }
 
 // Extension properties for easy access
-extra["appnow.versionName"] = getConfigValue("VERSION_NAME", "0.2.1")
-extra["appnow.catalogVersion"] = getConfigValue("CATALOG_VERSION", "0.2.1")
+extra["appnow.versionName"] = getConfigValue("VERSION_NAME", "0.2.3")
+extra["appnow.catalogVersion"] = getConfigValue("CATALOG_VERSION", "0.2.3")
 extra["appnow.compileSdk"] = getConfigValueAsInt("android.compileSdk", 36)
 extra["appnow.minSdk"] = getConfigValueAsInt("android.minSdk", 24)
 extra["appnow.targetSdk"] = getConfigValueAsInt("android.targetSdk", 36)
