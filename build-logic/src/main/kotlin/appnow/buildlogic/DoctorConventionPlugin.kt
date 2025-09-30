@@ -4,6 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 
 class DoctorConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -55,23 +56,45 @@ abstract class DoctorTask : DefaultTask() {
     private fun checkAndroidProperties() {
         println("\n📱 Android SDK Properties:")
         
-        val properties = mapOf(
+        val requiredProperties = listOf(
             "android.compileSdk" to "36",
             "android.minSdk" to "24", 
             "android.targetSdk" to "36"
         )
         
-        properties.forEach { (key, defaultValue) ->
-            val value = project.findProperty(key) ?: defaultValue
-            val isDefault = value == defaultValue
-            val status = if (isDefault) "⚠️  (using default)" else "✅"
-            println("  $status $key = $value")
+        val missingProperties = mutableListOf<String>()
+        
+        requiredProperties.forEach { (key, _) ->
+            val value = project.findProperty(key)
+            if (value == null) {
+                println("  ❌ $key: Missing")
+                missingProperties.add(key)
+            } else {
+                println("  ✅ $key = $value")
+            }
+        }
+        
+        // Fail if any required properties are missing
+        if (missingProperties.isNotEmpty()) {
+            val errorMessage = buildString {
+                appendLine("❌ Missing required Android SDK properties:")
+                missingProperties.forEach { key ->
+                    val suggestedValue = when (key) {
+                        "android.compileSdk" -> "36"
+                        "android.minSdk" -> "24"
+                        "android.targetSdk" -> "36"
+                        else -> "<number>"
+                    }
+                    appendLine("  Add $key=$suggestedValue to your root gradle.properties.")
+                }
+            }
+            throw GradleException(errorMessage)
         }
         
         // Check for dangerously low minSdk
-        val minSdk = (project.findProperty("android.minSdk") as? String)?.toIntOrNull() ?: 24
-        if (minSdk < 24) {
-            println("  ❌ WARNING: android.minSdk=$minSdk is below supported minimum (24)")
+        val minSdk = (project.findProperty("android.minSdk") as? String)?.toIntOrNull()
+        if (minSdk != null && minSdk < 24) {
+            throw GradleException("❌ android.minSdk=$minSdk is below supported minimum (24). Please update android.minSdk in your gradle.properties.")
         }
     }
 }

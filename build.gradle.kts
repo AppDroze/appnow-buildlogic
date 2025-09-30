@@ -48,11 +48,16 @@ tasks.register("info") {
     group = "workspace"
     description = "Show current build/publish versions"
     doLast {
-        val catalogVersion = providers.gradleProperty("CATALOG_VERSION").getOrElse("0.1.0")
-        val versionName    = providers.gradleProperty("VERSION_NAME").getOrElse("0.1.0")
+        // Read from included builds
+        val catalogVersion = gradle.includedBuild("catalog").projectDir.resolve("gradle.properties").readText().let { content ->
+            content.lines().find { it.startsWith("VERSION_NAME=") }?.substringAfter("=") ?: "0.1.0"
+        }
+        val pluginVersion = gradle.includedBuild("build-logic").projectDir.resolve("gradle.properties").readText().let { content ->
+            content.lines().find { it.startsWith("VERSION_NAME=") }?.substringAfter("=") ?: "0.1.0"
+        }
         println("📦 AppNow Build Logic Info")
         println("  Catalog Version: $catalogVersion")
-        println("  Plugin Version:  $versionName")
+        println("  Plugin Version:  $pluginVersion")
         println("  Publish URL:     ${findProperty("PUBLISH_URL") ?: System.getenv("PUBLISH_URL") ?: "not set (mavenLocal only)"}")
     }
 }

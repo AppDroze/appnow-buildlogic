@@ -4,6 +4,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.GradleException
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -14,30 +15,52 @@ class AndroidAppConventionPlugin : Plugin<Project> {
         pluginManager.apply("com.android.application")
         pluginManager.apply("org.jetbrains.kotlin.android")
 
-        val compileSdkVersion = providers.gradleProperty("android.compileSdk").map(String::toInt).orElse(36)
-        val minSdkVersion     = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24)
-        val targetSdkVersion  = providers.gradleProperty("android.targetSdk").map(String::toInt).orElse(36)
+        // Require SDK properties - fail with helpful error if missing
+        val compileSdkProp = providers.gradleProperty("android.compileSdk").orNull
+        val minSdkProp = providers.gradleProperty("android.minSdk").orNull
+        val targetSdkProp = providers.gradleProperty("android.targetSdk").orNull
+
+        if (compileSdkProp == null || minSdkProp == null || targetSdkProp == null) {
+            throw GradleException("""
+                Missing required Android SDK properties. Please add to your gradle.properties:
+                
+                android.compileSdk=36
+                android.minSdk=24
+                android.targetSdk=36
+                
+                These properties are required by the appnow.android.app convention plugin.
+            """.trimIndent())
+        }
+
+        val compileSdkVersion = compileSdkProp.toInt()
+        val minSdkVersion = minSdkProp.toInt()
+        val targetSdkVersion = targetSdkProp.toInt()
 
         // Compatibility check - fail early if consumer uses unsupported SDK versions
         val minAllowed = 24
-        check(minSdkVersion.get() >= minAllowed) {
-            "android.minSdk=${minSdkVersion.get()} is below supported minimum ($minAllowed). " +
-            "Override in your gradle.properties."
+        if (minSdkVersion < minAllowed) {
+            throw GradleException("""
+                android.minSdk=$minSdkVersion is below supported minimum ($minAllowed).
+                Please update android.minSdk in your gradle.properties.
+            """.trimIndent())
         }
 
-        val appId = providers.gradleProperty("app.applicationId").orElse("com.example.app")
-        val appVersionCode   = providers.gradleProperty("app.versionCode").map(String::toInt).orElse(1)
-        val appVersionName   = providers.gradleProperty("app.versionName").orElse("1.0.0")
+        // App identity properties are optional - only apply if present
+        val appId = providers.gradleProperty("app.applicationId").orNull
+        val appVersionCode = providers.gradleProperty("app.versionCode").orNull?.toIntOrNull()
+        val appVersionName = providers.gradleProperty("app.versionName").orNull
 
         extensions.configure<ApplicationExtension> {
-            compileSdk = compileSdkVersion.get()
+            compileSdk = compileSdkVersion
 
             defaultConfig {
-                applicationId = appId.get()
-                minSdk = minSdkVersion.get()
-                targetSdk = targetSdkVersion.get()
-                versionCode = appVersionCode.get()
-                versionName = appVersionName.get()
+                // Only set app identity properties if they exist
+                appId?.let { applicationId = it }
+                appVersionCode?.let { versionCode = it }
+                appVersionName?.let { versionName = it }
+                
+                minSdk = minSdkVersion
+                targetSdk = targetSdkVersion
                 testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 vectorDrawables { useSupportLibrary = true }
             }

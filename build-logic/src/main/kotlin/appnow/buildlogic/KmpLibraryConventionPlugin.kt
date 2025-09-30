@@ -4,6 +4,7 @@ import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.GradleException
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -14,8 +15,23 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
         pluginManager.apply("org.jetbrains.kotlin.multiplatform")
         pluginManager.apply("com.android.library")
 
-        val compileSdkVersion = providers.gradleProperty("android.compileSdk").map(String::toInt).orElse(36)
-        val minSdkVersion     = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24)
+        // Require SDK properties - fail with helpful error if missing
+        val compileSdkProp = providers.gradleProperty("android.compileSdk").orNull
+        val minSdkProp = providers.gradleProperty("android.minSdk").orNull
+
+        if (compileSdkProp == null || minSdkProp == null) {
+            throw GradleException("""
+                Missing required Android SDK properties. Please add to your gradle.properties:
+                
+                android.compileSdk=36
+                android.minSdk=24
+                
+                These properties are required by the appnow.kmp.library convention plugin.
+            """.trimIndent())
+        }
+
+        val compileSdkVersion = compileSdkProp.toInt()
+        val minSdkVersion = minSdkProp.toInt()
 
         extensions.configure<KotlinMultiplatformExtension> {
             androidTarget()
@@ -27,9 +43,8 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
         }
 
         extensions.configure<LibraryExtension> {
-            namespace = "com.appnow.${project.name}"
-            compileSdk = compileSdkVersion.get()
-            defaultConfig { minSdk = minSdkVersion.get() }
+            compileSdk = compileSdkVersion
+            defaultConfig { minSdk = minSdkVersion }
 
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_17
