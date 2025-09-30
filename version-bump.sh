@@ -7,7 +7,7 @@ set -e
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <new-version>"
-    echo "Example: $0 0.2.4"
+    echo "Example: $0 0.2.6"
     exit 1
 fi
 
