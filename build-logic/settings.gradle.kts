@@ -19,7 +19,7 @@ dependencyResolutionManagement {
         // Same note as above for GH Packages if needed
     }
     versionCatalogs {
-        val catVer = providers.gradleProperty("CATALOG_VERSION").getOrElse("0.1.0")
+        val catVer = providers.gradleProperty("CATALOG_VERSION").getOrElse("0.2.0")
         create("buildlibs") {
             from("com.appnow.build:appnow-catalog:$catVer")
         }
