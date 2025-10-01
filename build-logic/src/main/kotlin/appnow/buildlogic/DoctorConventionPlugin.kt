@@ -81,15 +81,14 @@ abstract class DoctorTask : DefaultTask() {
         println("  ✅ android.minSdk     = $minSdk")
         println("  ✅ android.targetSdk  = $targetSdk")
 
-        val minSupported = (p("MIN_SUPPORTED_MIN_SDK", "24") ?: "24").toInt()
         val minSdkInt = minSdk.toIntOrNull()
-        if (minSdkInt != null && minSdkInt < minSupported) {
+        if (minSdkInt != null && minSdkInt < 24) {
             throw GradleException(
                 """
-                ❌ android.minSdk=$minSdkInt is below supported minimum ($minSupported).
+                ❌ android.minSdk=$minSdkInt is below AppNow minimum (24).
                 
                 Fix: set at least:
-                  android.minSdk=$minSupported
+                  android.minSdk=24
                 in your gradle.properties.
                 """.trimIndent()
             )

@@ -34,13 +34,12 @@ class AndroidAppConventionPlugin : Plugin<Project> {
         val compileSdkVersion = providers.gradleProperty("android.compileSdk").map(String::toInt).orElse(36).get()
         val minSdkVersion = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24).get()
         val targetSdkVersion = providers.gradleProperty("android.targetSdk").map(String::toInt).orElse(36).get()
-        val minSupportedMinSdk = providers.gradleProperty("MIN_SUPPORTED_MIN_SDK").map(String::toInt).orElse(24).get()
 
-        // Compatibility check - fail early if consumer uses unsupported SDK versions
-        if (minSdkVersion < minSupportedMinSdk) {
+        // Enforce minimum SDK requirement (AppNow policy: minSdk >= 24)
+        if (minSdkVersion < 24) {
             throw GradleException("""
-                android.minSdk=$minSdkVersion is below supported minimum ($minSupportedMinSdk).
-                Please update android.minSdk in your gradle.properties.
+                android.minSdk=$minSdkVersion is below AppNow minimum (24).
+                Please update android.minSdk to at least 24 in your gradle.properties.
             """.trimIndent())
         }
 

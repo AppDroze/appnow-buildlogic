@@ -13,7 +13,6 @@ open class AppnowVersioningExtension @Inject constructor(objects: ObjectFactory)
     val compileSdk: Property<Int> = objects.property(Int::class.java)
     val minSdk: Property<Int> = objects.property(Int::class.java)
     val targetSdk: Property<Int> = objects.property(Int::class.java)
-    val minSupportedMinSdk: Property<Int> = objects.property(Int::class.java)
 }
 
 class VersioningPlugin : Plugin<Project> {
@@ -47,7 +46,6 @@ class VersioningPlugin : Plugin<Project> {
         ext.compileSdk.set(vi("android.compileSdk", 36))
         ext.minSdk.set(vi("android.minSdk", 24))
         ext.targetSdk.set(vi("android.targetSdk", 36))
-        ext.minSupportedMinSdk.set(vi("MIN_SUPPORTED_MIN_SDK", 24))
 
         // Export as Gradle properties so build scripts can read without referencing the class
         project.extensions.extraProperties.apply {
@@ -56,7 +54,6 @@ class VersioningPlugin : Plugin<Project> {
             set("android.compileSdk", ext.compileSdk.get().toString())
             set("android.minSdk", ext.minSdk.get().toString())
             set("android.targetSdk", ext.targetSdk.get().toString())
-            set("MIN_SUPPORTED_MIN_SDK", ext.minSupportedMinSdk.get().toString())
         }
     }
 }

@@ -22,7 +22,6 @@ class VersioningPluginTest {
             android.compileSdk=35
             android.minSdk=25
             android.targetSdk=35
-            MIN_SUPPORTED_MIN_SDK=24
         """)
 
         project.pluginManager.apply("appnow.versioning")
@@ -30,14 +29,17 @@ class VersioningPluginTest {
         // extension values
         val ext = project.extensions.findByName("appnowVersioning") as AppnowVersioningExtension
         assertEquals("9.9.9", ext.versionName.get())
+        assertEquals("9.9.9", ext.catalogVersion.get())
         assertEquals(35, ext.compileSdk.get())
         assertEquals(25, ext.minSdk.get())
         assertEquals(35, ext.targetSdk.get())
 
         // exported gradle properties
         assertEquals("9.9.9", project.findProperty("appnow.versionName"))
+        assertEquals("9.9.9", project.findProperty("appnow.catalogVersion"))
         assertEquals("35", project.findProperty("android.compileSdk"))
         assertEquals("25", project.findProperty("android.minSdk"))
+        assertEquals("35", project.findProperty("android.targetSdk"))
     }
 
     @Test
@@ -59,6 +61,7 @@ class VersioningPluginTest {
         // Set properties before plugin applies (simulates -P flags)
         project.extensions.extraProperties.apply {
             set("VERSION_NAME", "2.0.0")
+            set("CATALOG_VERSION", "2.0.0")  // explicitly set, otherwise defaults to VERSION_NAME
             set("android.compileSdk", "36")
             set("android.minSdk", "26")
             set("android.targetSdk", "36")
@@ -69,12 +72,14 @@ class VersioningPluginTest {
         // Verify plugin read the -P values (not file values)
         val ext = project.extensions.findByName("appnowVersioning") as AppnowVersioningExtension
         assertEquals("2.0.0", ext.versionName.get())
+        assertEquals("2.0.0", ext.catalogVersion.get())  // catalogVersion defaults to versionName
         assertEquals(36, ext.compileSdk.get())
         assertEquals(26, ext.minSdk.get())
         assertEquals(36, ext.targetSdk.get())
 
         // Verify plugin exported the values
         assertEquals("2.0.0", project.findProperty("appnow.versionName"))
+        assertEquals("2.0.0", project.findProperty("appnow.catalogVersion"))
         assertEquals("36", project.findProperty("android.compileSdk"))
         assertEquals("26", project.findProperty("android.minSdk"))
         assertEquals("36", project.findProperty("android.targetSdk"))
@@ -91,11 +96,15 @@ class VersioningPluginTest {
 
         val ext = project.extensions.findByName("appnowVersioning") as AppnowVersioningExtension
         assertNotNull(ext.versionName.get())          // default "0.0.1" per plugin
+        assertEquals("0.0.1", ext.versionName.get())
+        assertEquals("0.0.1", ext.catalogVersion.get())  // catalogVersion defaults to versionName
         assertEquals(36, ext.compileSdk.get())
         assertEquals(24, ext.minSdk.get())
         assertEquals(36, ext.targetSdk.get())
 
         // exported defaults present
+        assertEquals("0.0.1", project.findProperty("appnow.versionName"))
+        assertEquals("0.0.1", project.findProperty("appnow.catalogVersion"))
         assertEquals("36", project.findProperty("android.compileSdk"))
         assertEquals("24", project.findProperty("android.minSdk"))
         assertEquals("36", project.findProperty("android.targetSdk"))
