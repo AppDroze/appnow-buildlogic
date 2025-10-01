@@ -23,4 +23,7 @@ jobs:
 
       - name: Build and validate
         run: |
-          ./gradlew :catalog:generateCatalogAsToml :build-logic:build :build-logic:check -PBUILDLOGIC_USE_LOCAL_CATALOG=true
+          ./gradlew \
+            :versioning:build :versioning:check \
+            :catalog:generateCatalogAsToml \
+            :build-logic:build :build-logic:check

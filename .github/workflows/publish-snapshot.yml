@@ -28,6 +28,18 @@ jobs:
           echo "VERSION_NAME=0.1.0-SNAPSHOT" >> $GITHUB_OUTPUT
           echo "CATALOG_VERSION=0.1.0-SNAPSHOT" >> $GITHUB_OUTPUT
 
+      # 1) publish versioning first (it provides the plugin used by others)
+      - name: Build and Publish Versioning Plugin
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_URL: https://maven.pkg.github.com/${{ github.repository }}
+          VERSION_NAME: ${{ steps.v.outputs.VERSION_NAME }}
+          CATALOG_VERSION: ${{ steps.v.outputs.CATALOG_VERSION }}
+        run: |
+          ./gradlew :versioning:build :versioning:publish
+
+      # 2) publish catalog (consumed by build-logic at settings time)
       - name: Build and Publish Catalog
         env:
           GITHUB_ACTOR: ${{ github.actor }}
@@ -36,8 +48,9 @@ jobs:
           VERSION_NAME: ${{ steps.v.outputs.VERSION_NAME }}
           CATALOG_VERSION: ${{ steps.v.outputs.CATALOG_VERSION }}
         run: |
-          ./gradlew -p catalog build publish
+          ./gradlew :catalog:build :catalog:publish
 
+      # 3) finally, publish the convention plugins
       - name: Build and Publish Plugins
         env:
           GITHUB_ACTOR: ${{ github.actor }}
@@ -46,4 +59,4 @@ jobs:
           VERSION_NAME: ${{ steps.v.outputs.VERSION_NAME }}
           CATALOG_VERSION: ${{ steps.v.outputs.CATALOG_VERSION }}
         run: |
-          ./gradlew -p build-logic build publish
+          ./gradlew :build-logic:build :build-logic:publish
