@@ -14,6 +14,10 @@ version = versionFromEnv
     ?: versionFromProp
     ?: "0.0.1"
 
+java {
+    toolchain { languageVersion.set(JavaLanguageVersion.of(17)) }
+}
+
 repositories {
     mavenCentral()
     gradlePluginPortal()
