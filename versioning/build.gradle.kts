@@ -23,6 +23,15 @@ repositories {
     gradlePluginPortal()
 }
 
+dependencies {
+    testImplementation(kotlin("test"))          // JUnit 5 via Kotlin test
+    testImplementation(gradleTestKit())         // for ProjectBuilder
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
 gradlePlugin {
     plugins {
         register("appnowVersioning") {
