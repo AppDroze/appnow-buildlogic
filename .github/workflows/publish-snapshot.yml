@@ -37,7 +37,7 @@ jobs:
           VERSION_NAME: ${{ steps.v.outputs.VERSION_NAME }}
           CATALOG_VERSION: ${{ steps.v.outputs.CATALOG_VERSION }}
         run: |
-          ./gradlew :versioning:build :versioning:publish
+          ./gradlew :versioning:build :versioning:publish --no-configuration-cache
 
       # 2) publish catalog (consumed by build-logic at settings time)
       - name: Build and Publish Catalog
@@ -48,7 +48,7 @@ jobs:
           VERSION_NAME: ${{ steps.v.outputs.VERSION_NAME }}
           CATALOG_VERSION: ${{ steps.v.outputs.CATALOG_VERSION }}
         run: |
-          ./gradlew :catalog:build :catalog:publish
+          ./gradlew :catalog:build :catalog:publish --no-configuration-cache
 
       # 3) finally, publish the convention plugins
       - name: Build and Publish Plugins
@@ -59,4 +59,4 @@ jobs:
           VERSION_NAME: ${{ steps.v.outputs.VERSION_NAME }}
           CATALOG_VERSION: ${{ steps.v.outputs.CATALOG_VERSION }}
         run: |
-          ./gradlew :build-logic:build :build-logic:publish
+          ./gradlew :build-logic:build :build-logic:publish --no-configuration-cache
