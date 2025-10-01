@@ -5,14 +5,30 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.GradleException
+import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+
+private const val DEFAULT_TEST_RUNNER = "androidx.test.runner.AndroidJUnitRunner"
+private val DEFAULT_META_EXCLUDES = setOf("META-INF/AL2.0", "META-INF/LGPL2.1")
+
+interface AppnowAndroidAppExtension {
+    val enableMinify: Property<Boolean>
+    val instrumentationRunner: Property<String>
+}
+
 class AndroidAppConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("com.android.application")
         pluginManager.apply("org.jetbrains.kotlin.android")
+
+        // Create extension with sensible defaults
+        val ext = extensions.create("appnowAndroidApp", AppnowAndroidAppExtension::class.java).apply {
+            enableMinify.convention(false)
+            instrumentationRunner.convention(DEFAULT_TEST_RUNNER)
+        }
 
         // SDK properties with fallbacks from versioning plugin
         val compileSdkVersion = providers.gradleProperty("android.compileSdk").map(String::toInt).orElse(36).get()
@@ -44,17 +60,19 @@ class AndroidAppConventionPlugin : Plugin<Project> {
 
                 minSdk = minSdkVersion
                 targetSdk = targetSdkVersion
-                testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+                testInstrumentationRunner = ext.instrumentationRunner.get()
                 vectorDrawables { useSupportLibrary = true }
             }
 
             buildTypes {
                 getByName("release") {
-                    isMinifyEnabled = false
-                    proguardFiles(
-                        getDefaultProguardFile("proguard-android-optimize.txt"),
-                        "proguard-rules.pro"
-                    )
+                    isMinifyEnabled = ext.enableMinify.get()
+                    if (ext.enableMinify.get()) {
+                        proguardFiles(
+                            getDefaultProguardFile("proguard-android-optimize.txt"),
+                            "proguard-rules.pro"
+                        )
+                    }
                 }
             }
 
@@ -69,7 +87,7 @@ class AndroidAppConventionPlugin : Plugin<Project> {
             }
 
             packaging {
-                resources.excludes += setOf("META-INF/AL2.0", "META-INF/LGPL2.1")
+                resources.excludes += DEFAULT_META_EXCLUDES
             }
         }
 
