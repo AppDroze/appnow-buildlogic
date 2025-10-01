@@ -96,9 +96,7 @@ abstract class DoctorTask : DefaultTask() {
         val compileSdk = gpInt("android.compileSdk", 36)
         val minSdk     = gpIntDirect("android.minSdk", 24)
         val targetSdk  = gpInt("android.targetSdk", 36)
-        val minSupportedMinSdk = gpDirect("appnow.minSupportedMinSdk")?.toIntOrNull()
-            ?: gpDirect("MIN_SUPPORTED_MIN_SDK")?.toIntOrNull()
-            ?: 24
+        val policyFloor = gpIntDirect("appnow.minSupportedMinSdk", 24)
 
         val agpVer     = detectAgpVersion()
         val kVer       = detectKotlinVersion()
@@ -112,12 +110,7 @@ abstract class DoctorTask : DefaultTask() {
         println("\n📱 Android SDK")
         println("  compileSdk=$compileSdk  minSdk=$minSdk  targetSdk=$targetSdk")
         println("  ✅ android.minSdk      = $minSdk")
-        println("  ✅ policy.minSupported = $minSupportedMinSdk")
-
-        if (project.findProperty("MIN_SUPPORTED_MIN_SDK") != null &&
-            project.findProperty("appnow.minSupportedMinSdk") == null) {
-            logger.warn("⚠️  Detected deprecated MIN_SUPPORTED_MIN_SDK. Switch to appnow.minSupportedMinSdk.")
-        }
+        println("  ✅ policy.minSupported = $policyFloor")
 
         // AndroidX check (fail-fast)
         if (!useAndroidX) {
@@ -134,9 +127,9 @@ abstract class DoctorTask : DefaultTask() {
         }
 
         // minSdk guard
-        if (minSdk < minSupportedMinSdk) {
-            throw org.gradle.api.GradleException("❌ android.minSdk=$minSdk is below supported minimum ($minSupportedMinSdk). " +
-                "Increase module minSdk or lower the policy floor.")
+        if (minSdk < policyFloor) {
+            throw org.gradle.api.GradleException("❌ android.minSdk=$minSdk is below policy floor ($policyFloor). " +
+                "Set -Pandroid.minSdk=$policyFloor or update your gradle.properties.")
         }
 
         // AGP vs compileSdk advisory (warning, not fatal)

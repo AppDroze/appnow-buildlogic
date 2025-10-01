@@ -67,14 +67,10 @@ appnowAndroidApp {
 3. Use: `from("com.appnow.build:appnow-catalog:x.y.z")` (check build-config.properties for current version)
 
 ## Min SDK policy
-- **android.minSdk** – your module's configured minSdk (consumer sets/overrides this).
-- **appnow.minSupportedMinSdk** – policy floor defined by AppNow build logic. Builds fail if `android.minSdk` is lower.
+- `android.minSdk` — your module's minSdk (consumer sets it)
+- `appnow.minSupportedMinSdk` — policy floor (defaults to 24; configured centrally)
 
-Default floor: `24`. You can raise/lower the floor centrally in `build-config.properties`.
-
-### Migration
-`MIN_SUPPORTED_MIN_SDK` is deprecated. Use `appnow.minSupportedMinSdk`.
-If both are present, the namespaced key wins.
+Builds fail if `android.minSdk < appnow.minSupportedMinSdk`.
 
 ## Structure
 ```

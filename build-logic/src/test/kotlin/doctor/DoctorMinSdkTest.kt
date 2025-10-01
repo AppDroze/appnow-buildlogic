@@ -30,6 +30,6 @@ class DoctorMinSdkTest {
         """.trimIndent())
 
         val result = runner(dir, "appnowDoctor", "-Pappnow.minSupportedMinSdk=24").buildAndFail()
-        assertTrue(result.output.contains("❌ android.minSdk=23 is below supported minimum (24)"))
+        assertTrue(result.output.contains("❌ android.minSdk=23 is below policy floor (24)"))
     }
 }

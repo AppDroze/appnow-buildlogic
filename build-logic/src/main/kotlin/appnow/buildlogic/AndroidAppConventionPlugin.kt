@@ -37,7 +37,6 @@ class AndroidAppConventionPlugin : Plugin<Project> {
         
         val minSdkValue = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24).get()
         val minSupportedMinSdk = providers.gradleProperty("appnow.minSupportedMinSdk")
-            .orElse(providers.gradleProperty("MIN_SUPPORTED_MIN_SDK")) // TODO: drop legacy in v0.4.0
             .map(String::toInt)
             .orElse(24)
             .get()

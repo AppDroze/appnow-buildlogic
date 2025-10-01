@@ -46,7 +46,7 @@ class VersioningPluginTest {
     }
 
     @Test
-    fun `precedence namespaced key wins over legacy when both set`() {
+    fun `sets minSupportedMinSdk from namespaced property`() {
         val dir = createTempDir(prefix = "ver-plugin-")
         write(dir, "settings.gradle.kts", """rootProject.name = "tmp" """)
         write(dir, "build.gradle.kts", """
@@ -58,28 +58,7 @@ class VersioningPluginTest {
             }
         """.trimIndent())
 
-        val res = runner(dir, "echo", "-Pappnow.minSupportedMinSdk=26", "-PMIN_SUPPORTED_MIN_SDK=25").build()
+        val res = runner(dir, "echo", "-Pappnow.minSupportedMinSdk=26").build()
         assertTrue(res.output.contains("minSupported=26"))
-        assertTrue(res.output.contains("MIN_SUPPORTED_MIN_SDK is deprecated"))
-        assertTrue(res.output.contains("using appnow.minSupportedMinSdk=26"))
-    }
-
-    @Test
-    fun `legacy only uses legacy value with deprecation warning`() {
-        val dir = createTempDir(prefix = "ver-plugin-")
-        write(dir, "settings.gradle.kts", """rootProject.name = "tmp" """)
-        write(dir, "build.gradle.kts", """
-            plugins { id("appnow.versioning") }
-            tasks.register("echo") { 
-                doLast { 
-                    println("minSupported=" + project.extensions.extraProperties.get("appnow.minSupportedMinSdk"))
-                } 
-            }
-        """.trimIndent())
-
-        val res = runner(dir, "echo", "-PMIN_SUPPORTED_MIN_SDK=25").build()
-        assertTrue(res.output.contains("minSupported=25"))
-        assertTrue(res.output.contains("MIN_SUPPORTED_MIN_SDK is deprecated"))
-        assertTrue(res.output.contains("use appnow.minSupportedMinSdk instead"))
     }
 }

@@ -59,24 +59,8 @@ class VersioningPlugin : Plugin<Project> {
         val minSdk = int("android.minSdk", 24)
         val targetSdk = int("android.targetSdk", 36)
         
-        // Read namespaced first; legacy only for fallback
-        val nsFloor = int("appnow.minSupportedMinSdk", null)
-        val legacyFloor = int("MIN_SUPPORTED_MIN_SDK", null)
-
-        val resolvedFloor = when {
-            nsFloor != null && legacyFloor != null && nsFloor != legacyFloor -> {
-                logger.warn("⚠️  MIN_SUPPORTED_MIN_SDK is deprecated. Both keys found; " +
-                            "using appnow.minSupportedMinSdk=$nsFloor (legacy=$legacyFloor).")
-                nsFloor
-            }
-            nsFloor != null -> nsFloor
-            legacyFloor != null -> {
-                logger.warn("⚠️  MIN_SUPPORTED_MIN_SDK is deprecated; use appnow.minSupportedMinSdk instead.")
-                legacyFloor
-            }
-            else -> 24
-        }
-
+        // Read namespaced only, default 24
+        val resolvedFloor = int("appnow.minSupportedMinSdk", 24)
         ext.minSupportedMinSdk.set(resolvedFloor)
 
         // basic semver hint (non-fatal)
@@ -93,7 +77,6 @@ class VersioningPlugin : Plugin<Project> {
             set("android.minSdk", minSdk.toString())
             set("android.targetSdk", targetSdk.toString())
             set("appnow.minSupportedMinSdk", ext.minSupportedMinSdk.get().toString())
-            set("MIN_SUPPORTED_MIN_SDK", ext.minSupportedMinSdk.get().toString()) // legacy alias
         }
 
         // set project.version if unspecified
