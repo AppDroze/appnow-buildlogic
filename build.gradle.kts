@@ -3,6 +3,12 @@ val BL  = gradle.includedBuild("build-logic")
 val CAT = gradle.includedBuild("catalog")
 val VER = gradle.includedBuild("versioning")
 
+// Apply versioning and doctor plugins to root project
+plugins {
+    id("appnow.versioning")
+    id("appnow.doctor")
+}
+
 tasks.register("cleanAll") {
     group = "workspace"
     dependsOn(

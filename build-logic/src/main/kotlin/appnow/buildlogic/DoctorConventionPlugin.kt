@@ -18,41 +18,54 @@ class DoctorConventionPlugin : Plugin<Project> {
 
 abstract class DoctorTask : DefaultTask() {
 
-    @TaskAction
-    fun run() {
-        println("🔍 AppNow Build Doctor")
-        println("=".repeat(60))
+    private fun gp(key: String): String? = project.findProperty(key)?.toString()
 
-        printResolvedVersions()
-        checkPluginClasses()
-        checkAndroidProperties()
-        warnAgpVsCompileSdk()
-        requireAndroidX()
+    private fun gpInt(key: String, fallback: Int): Int =
+        gp(key)?.toIntOrNull() ?: fallback
 
-        println("=".repeat(60))
-        println("✅ Doctor check complete")
+    private fun boolProp(key: String, default: Boolean = true): Boolean =
+        gp(key)?.equals("true", ignoreCase = true) ?: default
+
+    private fun detectAgpVersion(): String = runCatching {
+        // AGP 8.x
+        val c1 = Class.forName("com.android.Version")
+        c1.getField("ANDROID_GRADLE_PLUGIN_VERSION").get(null).toString()
+    }.recoverCatching {
+        // Older AGP
+        val c2 = Class.forName("com.android.builder.model.Version")
+        c2.getField("ANDROID_GRADLE_PLUGIN_VERSION").get(null).toString()
+    }.getOrDefault("unknown")
+
+    private fun detectKotlinVersion(): String = runCatching {
+        // Try to read from Kotlin plugin wrapper package version
+        Class.forName("org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper")
+            .`package`?.implementationVersion ?: "unknown"
+    }.getOrDefault("unknown")
+
+    private fun detectComposeVersion(): String = runCatching {
+        // JetBrains Compose exposes this in the Gradle plugin jar
+        Class.forName("org.jetbrains.compose.ComposeBuildConfig")
+            .getField("composeVersion").get(null).toString()
+    }.getOrDefault("unknown")
+
+    private fun minAgpFor(compileSdk: Int): String = when {
+        compileSdk >= 36 -> "8.4.0"
+        compileSdk >= 35 -> "8.3.0"
+        compileSdk >= 34 -> "8.2.0"
+        else -> "8.0.0"
     }
 
-    private fun p(key: String, default: String? = null): String? =
-        // prefer values exported by versioning plugin via extraProperties / gradle properties
-        (project.findProperty(key) as? String) ?: default
-
-    private fun printResolvedVersions() {
-        println("\n📋 Resolved Versions:")
-
-        val versionName   = p("appnow.versionName") ?: p("VERSION_NAME") ?: "unknown"
-        val catalogVer    = p("appnow.catalogVersion") ?: p("CATALOG_VERSION") ?: versionName
-
-        val agpVer        = agpVersion() ?: "unknown"
-        val kotlinVer     = kotlinVersion() ?: "unknown"
-        val composeVer    = composePluginVersion() ?: "unknown"
-
-        println("  📦 Catalog Version: $catalogVer")
-        println("  🔧 Plugin Version:  $versionName")
-        println("  🧩 AGP:             $agpVer")
-        println("  🧠 Kotlin:          $kotlinVer")
-        println("  🎨 Compose MPP:     $composeVer")
+    private fun compareVersions(a: String, b: String): Int {
+        fun parse(v: String) = v.split('.', '-', '_').take(3).mapNotNull { it.toIntOrNull() }
+        val pa = parse(a).padEnd(3); val pb = parse(b).padEnd(3)
+        for (i in 0 until 3) {
+            val d = pa[i].compareTo(pb[i])
+            if (d != 0) return d
+        }
+        return 0
     }
+    
+    private fun List<Int>.padEnd(n: Int): List<Int> = this + List((n - size).coerceAtLeast(0)) { 0 }
 
     private fun checkPluginClasses() {
         println("\n📦 Plugin Classes on Classpath:")
@@ -71,84 +84,63 @@ abstract class DoctorTask : DefaultTask() {
         }
     }
 
-    private fun checkAndroidProperties() {
-        println("\n📱 Android SDK Properties:")
-        val compileSdk = p("android.compileSdk", "36")!!
-        val minSdk     = p("android.minSdk", "24")!!
-        val targetSdk  = p("android.targetSdk", "36")!!
+    @TaskAction
+    fun run() {
+        println("🔍 AppNow Build Doctor\n" + "=".repeat(60))
 
-        println("  ✅ android.compileSdk = $compileSdk")
-        println("  ✅ android.minSdk     = $minSdk")
-        println("  ✅ android.targetSdk  = $targetSdk")
+        val compileSdk = gpInt("android.compileSdk", 36)
+        val minSdk     = gpInt("android.minSdk", 24)
+        val targetSdk  = gpInt("android.targetSdk", 36)
+        val minSupportedMinSdk = gpInt("MIN_SUPPORTED_MIN_SDK", 24)
 
-        val minSdkInt = minSdk.toIntOrNull()
-        if (minSdkInt != null && minSdkInt < 24) {
-            throw GradleException(
-                """
-                ❌ android.minSdk=$minSdkInt is below AppNow minimum (24).
-                
-                Fix: set at least:
-                  android.minSdk=24
-                in your gradle.properties.
-                """.trimIndent()
-            )
-        }
-    }
+        val agpVer     = detectAgpVersion()
+        val kVer       = detectKotlinVersion()
+        val composeVer = detectComposeVersion()
+        val useAndroidX = boolProp("android.useAndroidX", true)
 
-    private fun warnAgpVsCompileSdk() {
-        val agp = agpVersion() ?: return
-        val compileSdk = (p("android.compileSdk", "36") ?: "36").toIntOrNull() ?: return
+        println("\n📋 Resolved Versions")
+        println("  🔧 Plugins:  Kotlin=$kVer, AGP=$agpVer, Compose=$composeVer")
+        println("  📦 AppNow:   catalog=${gp("appnow.catalogVersion") ?: gp("CATALOG_VERSION") ?: "unknown"}, plugin=${gp("appnow.versionName") ?: gp("VERSION_NAME") ?: "unknown"}")
 
-        // simple guidance table (warn-only)
-        // 33 → 8.0+, 34 → 8.1+, 35 → 8.2+, 36 → 8.3+
-        val requiredAgpMinor = when {
-            compileSdk >= 36 -> 3
-            compileSdk >= 35 -> 2
-            compileSdk >= 34 -> 1
-            compileSdk >= 33 -> 0
-            else -> null
-        } ?: return
+        println("\n📱 Android SDK")
+        println("  compileSdk=$compileSdk  minSdk=$minSdk  targetSdk=$targetSdk")
 
-        val agpMinor = agp.split('.').getOrNull(1)?.toIntOrNull()
-        if (agpMinor != null && agpMinor < requiredAgpMinor) {
-            println(
-                "⚠️  AGP $agp may be too old for compileSdk=$compileSdk. " +
-                "Recommended AGP 8.$requiredAgpMinor+."
-            )
-        }
-    }
-
-    private fun requireAndroidX() {
-        val useAndroidX = (p("android.useAndroidX") ?: "true").toBoolean()
+        // AndroidX check (fail-fast)
         if (!useAndroidX) {
-            throw GradleException(
+            throw org.gradle.api.GradleException(
                 """
                 ❌ android.useAndroidX must be true.
-                
+
                 Fix: add to gradle.properties:
                   android.useAndroidX=true
                 """.trimIndent()
             )
         } else {
-            println("\n✅ AndroidX enabled (android.useAndroidX=true)")
+            println("  ✅ AndroidX enabled (android.useAndroidX=true)")
         }
+
+        // minSdk guard
+        if (minSdk < minSupportedMinSdk) {
+            throw org.gradle.api.GradleException(
+                "❌ android.minSdk=$minSdk is below supported minimum ($minSupportedMinSdk). Please raise it."
+            )
+        }
+
+        // AGP vs compileSdk advisory (warning, not fatal)
+        val requiredAgp = minAgpFor(compileSdk)
+        if (agpVer != "unknown" && requiredAgp != "8.0.0") {
+            val warn = compareVersions(agpVer, requiredAgp) < 0
+            if (warn) {
+                println("⚠️  AGP $agpVer may be too old for compileSdk=$compileSdk. Recommended AGP >= $requiredAgp.")
+            } else {
+                println("  ✅ AGP $agpVer is suitable for compileSdk=$compileSdk (>= $requiredAgp).")
+            }
+        }
+
+        // Classpath sanity
+        checkPluginClasses()
+
+        println("\n" + "=".repeat(60))
+        println("✅ Doctor check complete")
     }
-
-    // --- version helpers ---
-
-    private fun agpVersion(): String? = try {
-        val clazz = Class.forName("com.android.Version")
-        clazz.getField("ANDROID_GRADLE_PLUGIN_VERSION").get(null)?.toString()
-    } catch (_: Throwable) { null }
-
-    private fun kotlinVersion(): String? = try {
-        Class.forName("org.jetbrains.kotlin.config.KotlinCompilerVersion")
-            .getField("VERSION").get(null)?.toString()
-    } catch (_: Throwable) { null }
-
-    private fun composePluginVersion(): String? = try {
-        // Available in org.jetbrains.compose:compose-gradle-plugin
-        Class.forName("org.jetbrains.compose.ComposeBuildConfig")
-            .getField("pluginVersion").get(null)?.toString()
-    } catch (_: Throwable) { null }
 }
