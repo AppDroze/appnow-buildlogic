@@ -32,6 +32,13 @@ dependencies {
     implementation(buildlibs.kotlin.gradle.plugin)
     implementation(buildlibs.android.gradle.plugin)
     implementation(buildlibs.compose.gradle.plugin)
+
+    testImplementation(gradleTestKit())
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 gradlePlugin {
