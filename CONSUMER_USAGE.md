@@ -69,6 +69,12 @@ plugins {
     id("appnow.android.app") version "x.y.z" // Check build-config.properties for current version
 }
 
+// Configure Android app (optional)
+appnowAndroidApp {
+    enableMinify.set(true)  // Enable R8 for release builds (default: false)
+    instrumentationRunner.set("androidx.test.runner.AndroidJUnitRunner")  // Customize test runner
+}
+
 // For Compose projects, add your dependencies:
 dependencies {
     implementation(compose.runtime)
