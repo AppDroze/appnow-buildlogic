@@ -5,7 +5,14 @@ plugins {
 }
 
 group = providers.gradleProperty("GROUP").getOrElse("com.appnow.versioning")
-version = providers.gradleProperty("VERSION_NAME").getOrElse("0.3.0")
+
+// Resolve version from environment (CI), then Gradle property, then fallback
+val versionFromEnv = System.getenv("VERSION_NAME")
+val versionFromProp = findProperty("VERSION_NAME") as? String
+
+version = versionFromEnv
+    ?: versionFromProp
+    ?: "0.0.1"
 
 repositories {
     mavenCentral()
