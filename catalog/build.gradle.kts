@@ -6,7 +6,16 @@ plugins {
 }
 
 group = providers.gradleProperty("GROUP").getOrElse("com.appnow.build")
-version = providers.gradleProperty("appnow.versionName").getOrElse("0.0.1")
+
+// Resolve catalog version from appnow.versioning (extraProperties), with fallbacks
+val catVersionFromExtras = (findProperty("appnow.versionName") as? String)    // we publish the catalog with the same x.y.z
+val catVersionFromEnv    = System.getenv("VERSION_NAME")
+val catVersionFromProp   = findProperty("VERSION_NAME") as? String
+
+version = catVersionFromExtras
+    ?: catVersionFromEnv
+    ?: catVersionFromProp
+    ?: "0.0.1"
 
 catalog {
     versionCatalog {

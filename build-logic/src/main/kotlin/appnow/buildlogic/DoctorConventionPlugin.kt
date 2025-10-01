@@ -38,26 +38,32 @@ abstract class DoctorTask : DefaultTask() {
     
     private fun printResolvedVersions() {
         println("\n📋 Resolved Versions:")
-        
-        val configFile = project.file("build-config.properties")
-        val properties = java.util.Properties()
-        if (configFile.exists()) {
-            configFile.inputStream().use { properties.load(it) }
-        }
-        
-        val catalogVersion = System.getenv("CATALOG_VERSION")
-            ?: project.findProperty("CATALOG_VERSION") as? String
-            ?: properties.getProperty("CATALOG_VERSION", "0.3.0")
-            
-        val versionName = System.getenv("VERSION_NAME")
-            ?: project.findProperty("VERSION_NAME") as? String
-            ?: properties.getProperty("VERSION_NAME", "0.3.0")
-        
+
+        // Prefer extras (set by appnow.versioning), then env/props, then file fallback
+        val extras = project.extensions.extraProperties
+
+        fun getExtra(name: String) =
+            if (extras.has(name)) extras.get(name)?.toString() else null
+
+        val versionName = getExtra("appnow.versionName")
+            ?: System.getenv("VERSION_NAME")
+            ?: project.findProperty("VERSION_NAME")?.toString()
+            ?: "0.0.1"
+
+        val catalogVersion = getExtra("appnow.catalogVersion")
+            ?: System.getenv("CATALOG_VERSION")
+            ?: project.findProperty("CATALOG_VERSION")?.toString()
+            ?: versionName
+
+        val compileSdk = getExtra("android.compileSdk") ?: "36"
+        val minSdk     = getExtra("android.minSdk") ?: "24"
+        val targetSdk  = getExtra("android.targetSdk") ?: "36"
+
         println("  📦 Catalog Version: $catalogVersion")
         println("  🔧 Plugin Version:  $versionName")
-        println("  📱 Compile SDK:     ${properties.getProperty("android.compileSdk", "36")}")
-        println("  📱 Min SDK:         ${properties.getProperty("android.minSdk", "24")}")
-        println("  📱 Target SDK:      ${properties.getProperty("android.targetSdk", "36")}")
+        println("  📱 Compile SDK:     $compileSdk")
+        println("  📱 Min SDK:         $minSdk")
+        println("  📱 Target SDK:      $targetSdk")
     }
     
     private fun checkPluginClasses() {

@@ -6,7 +6,16 @@ plugins {
 }
 
 group = providers.gradleProperty("GROUP").getOrElse("com.appnow.buildlogic")
-version = providers.gradleProperty("appnow.versionName").getOrElse("0.0.1")
+
+// Resolve plugin version set by appnow.versioning (extraProperties), with fallbacks
+val appnowVersionFromExtras = (findProperty("appnow.versionName") as? String)
+val appnowVersionFromEnv    = System.getenv("VERSION_NAME")
+val appnowVersionFromProp   = findProperty("VERSION_NAME") as? String
+
+version = appnowVersionFromExtras
+    ?: appnowVersionFromEnv
+    ?: appnowVersionFromProp
+    ?: "0.0.1"
 
 repositories {
     mavenLocal()
