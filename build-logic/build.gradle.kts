@@ -1,5 +1,6 @@
 plugins {
     id("appnow.versioning")
+    id("appnow.publishing")
     `kotlin-dsl`
     `java-gradle-plugin`
     `maven-publish`
@@ -72,19 +73,6 @@ gradlePlugin {
 }
 
 publishing {
-    repositories {
-        val publishUrl = findProperty("PUBLISH_URL") as String? ?: System.getenv("PUBLISH_URL")
-        if (publishUrl != null) {
-            maven {
-                url = uri(publishUrl)
-                credentials {
-                    username = findProperty("MAVEN_USER") as String? ?: System.getenv("GITHUB_ACTOR") ?: ""
-                    password = findProperty("MAVEN_TOKEN") as String? ?: System.getenv("GITHUB_TOKEN") ?: ""
-                }
-            }
-        }
-        mavenLocal()
-    }
     publications.withType<MavenPublication>().configureEach {
         pom {
             name.set("AppNow Build Logic")

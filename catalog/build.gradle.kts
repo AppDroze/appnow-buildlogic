@@ -1,5 +1,6 @@
 plugins {
     id("appnow.versioning")
+    id("appnow.publishing")
     `version-catalog`
     `maven-publish`
     base
@@ -30,19 +31,6 @@ tasks.register("verifyCatalog") {
 }
 
 publishing {
-    repositories {
-        val publishUrl = findProperty("PUBLISH_URL") as String? ?: System.getenv("PUBLISH_URL")
-        if (publishUrl != null) {
-            maven {
-                url = uri(publishUrl)
-                credentials {
-                    username = findProperty("MAVEN_USER") as String? ?: System.getenv("GITHUB_ACTOR") ?: ""
-                    password = findProperty("MAVEN_TOKEN") as String? ?: System.getenv("GITHUB_TOKEN") ?: ""
-                }
-            }
-        }
-        mavenLocal()
-    }
     publications {
         create<MavenPublication>("catalog") {
             from(components["versionCatalog"])

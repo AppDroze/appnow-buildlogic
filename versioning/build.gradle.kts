@@ -40,6 +40,12 @@ gradlePlugin {
             displayName = "AppNow Versioning"
             description = "Centralized version + SDK config loader for AppNow builds"
         }
+        register("appnowPublishing") {
+            id = "appnow.publishing"
+            implementationClass = "appnow.versioning.PublishingPlugin"
+            displayName = "AppNow Publishing"
+            description = "Configures publishing repositories for AppNow builds"
+        }
     }
 }
 
