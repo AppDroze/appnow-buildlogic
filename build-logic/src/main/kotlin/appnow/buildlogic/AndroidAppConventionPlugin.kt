@@ -34,13 +34,22 @@ class AndroidAppConventionPlugin : Plugin<Project> {
         val compileSdkVersion = providers.gradleProperty("android.compileSdk").map(String::toInt).orElse(36).get()
         val minSdkVersion = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24).get()
         val targetSdkVersion = providers.gradleProperty("android.targetSdk").map(String::toInt).orElse(36).get()
+        
+        val minSdkValue = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24).get()
+        val minSupportedMinSdk = providers.gradleProperty("appnow.minSupportedMinSdk")
+            .orElse(providers.gradleProperty("MIN_SUPPORTED_MIN_SDK")) // TODO: drop legacy in v0.4.0
+            .map(String::toInt)
+            .orElse(24)
+            .get()
 
-        // Enforce minimum SDK requirement (AppNow policy: minSdk >= 24)
-        if (minSdkVersion < 24) {
-            throw GradleException("""
-                android.minSdk=$minSdkVersion is below AppNow minimum (24).
-                Please update android.minSdk to at least 24 in your gradle.properties.
-            """.trimIndent())
+        require(minSdkValue >= minSupportedMinSdk) {
+            """
+            ❌ android.minSdk=$minSdkValue is below the supported minimum ($minSupportedMinSdk).
+            
+            Fix: raise the module's minSdk or lower your policy floor.
+              - Project minSdk (consumer):   gradle.properties → android.minSdk=$minSupportedMinSdk
+              - Policy floor (this repo):    build-config.properties → appnow.minSupportedMinSdk=$minSupportedMinSdk
+            """.trimIndent()
         }
 
         // App identity properties are optional - only apply if present
@@ -57,7 +66,7 @@ class AndroidAppConventionPlugin : Plugin<Project> {
                 appVersionCode?.let { versionCode = it }
                 appVersionName?.let { versionName = it }
 
-                minSdk = minSdkVersion
+                minSdk = minSdkValue
                 targetSdk = targetSdkVersion
                 testInstrumentationRunner = ext.instrumentationRunner.get()
                 vectorDrawables { useSupportLibrary = true }

@@ -17,6 +17,17 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
         // SDK properties with fallbacks from versioning plugin
         val compileSdkVersion = providers.gradleProperty("android.compileSdk").map(String::toInt).orElse(36).get()
         val minSdkVersion = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24).get()
+        
+        val minSdkValue = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24).get()
+        val minSupportedMinSdk = providers.gradleProperty("appnow.minSupportedMinSdk")
+            .orElse(providers.gradleProperty("MIN_SUPPORTED_MIN_SDK")) // TODO: drop legacy in v0.4.0
+            .map(String::toInt)
+            .orElse(24)
+            .get()
+
+        require(minSdkValue >= minSupportedMinSdk) {
+            "❌ android.minSdk=$minSdkValue is below supported minimum ($minSupportedMinSdk)."
+        }
 
         extensions.configure<KotlinMultiplatformExtension> {
             androidTarget()
@@ -46,7 +57,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
 
         extensions.configure<LibraryExtension> {
             compileSdk = compileSdkVersion
-            defaultConfig { minSdk = minSdkVersion }
+            defaultConfig { minSdk = minSdkValue }
 
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_17
