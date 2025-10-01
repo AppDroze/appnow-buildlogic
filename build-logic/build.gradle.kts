@@ -17,6 +17,7 @@ version = appnowVersionFromExtras
     ?: appnowVersionFromProp
     ?: "0.0.1"
 
+// NOTE: mavenLocal() first on purpose for fast local iteration while developing included builds
 repositories {
     mavenLocal()
     gradlePluginPortal()

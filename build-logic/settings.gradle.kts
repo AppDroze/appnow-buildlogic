@@ -1,6 +1,7 @@
 import java.util.Properties
 
 pluginManagement {
+    // NOTE: mavenLocal() first on purpose for fast local iteration while developing included builds
     repositories {
         mavenLocal()
         gradlePluginPortal()
@@ -12,6 +13,7 @@ pluginManagement {
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
+    // NOTE: mavenLocal() first on purpose for fast local iteration while developing included builds
     repositories {
         mavenLocal()
         gradlePluginPortal()
