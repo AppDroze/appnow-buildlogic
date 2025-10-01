@@ -25,11 +25,12 @@ jobs:
 
       - name: Extract & validate version from tag
         id: v
+        shell: bash
         run: |
-          REF="${GITHUB_REF##*/}"
-          VERSION="${REF#v}"
-          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid version tag: $REF (expected vX.Y.Z)"; exit 1
+          REF="${GITHUB_REF##*/}"        # e.g. v0.3.1
+          VERSION="${REF#v}"             # e.g. 0.3.1
+          if ! [[ "$REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid tag: $REF (expected vX.Y.Z)"; exit 1
           fi
           echo "VERSION_NAME=$VERSION" >> $GITHUB_OUTPUT
           echo "CATALOG_VERSION=$VERSION" >> $GITHUB_OUTPUT
