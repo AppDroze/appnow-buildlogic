@@ -1,6 +1,7 @@
 package appnow.versioning
 
 import org.gradle.testfixtures.ProjectBuilder
+import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -41,8 +42,8 @@ class VersioningPluginTest {
 
     @Test
     fun `-P properties override file values`() {
-        val project = ProjectBuilder.builder().build()
-        writeProps(project.projectDir, """
+        val tmpDir = createTempDirectory(prefix = "versioning-test-").toFile()
+        writeProps(tmpDir, """
             VERSION_NAME=1.2.3
             CATALOG_VERSION=1.2.3
             android.compileSdk=34
@@ -50,25 +51,35 @@ class VersioningPluginTest {
             android.targetSdk=34
         """)
 
-        // simulate -P
-        project.extensions.extraProperties.set("VERSION_NAME", "2.0.0")
-        project.extensions.extraProperties.set("CATALOG_VERSION", "2.0.0")
-        project.extensions.extraProperties.set("android.compileSdk", "36")
-        project.extensions.extraProperties.set("android.minSdk", "26")
-        project.extensions.extraProperties.set("android.targetSdk", "36")
+        // simulate -P by setting properties BEFORE applying plugin
+        val project = ProjectBuilder.builder()
+            .withProjectDir(tmpDir)
+            .build()
+        
+        // Set properties before plugin applies (simulates -P flags)
+        project.extensions.extraProperties.apply {
+            set("VERSION_NAME", "2.0.0")
+            set("android.compileSdk", "36")
+            set("android.minSdk", "26")
+            set("android.targetSdk", "36")
+        }
 
         project.pluginManager.apply("appnow.versioning")
 
+        // Verify plugin read the -P values (not file values)
         val ext = project.extensions.findByName("appnowVersioning") as AppnowVersioningExtension
         assertEquals("2.0.0", ext.versionName.get())
         assertEquals(36, ext.compileSdk.get())
         assertEquals(26, ext.minSdk.get())
         assertEquals(36, ext.targetSdk.get())
 
+        // Verify plugin exported the values
         assertEquals("2.0.0", project.findProperty("appnow.versionName"))
         assertEquals("36", project.findProperty("android.compileSdk"))
         assertEquals("26", project.findProperty("android.minSdk"))
         assertEquals("36", project.findProperty("android.targetSdk"))
+        
+        tmpDir.deleteRecursively()
     }
 
     @Test
