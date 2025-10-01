@@ -45,6 +45,15 @@ dependencies {
   implementation(compose.ui)
   implementation(compose.components.resources)
 }
+
+// Configure Android app convention (optional)
+appnowAndroidApp {
+  // Enable R8/proguard for release builds (default: false)
+  enableMinify.set(true)
+  
+  // Override test instrumentation runner (default shown)
+  instrumentationRunner.set("androidx.test.runner.AndroidJUnitRunner")
+}
 ```
 
 ### B) Published plugins

@@ -51,21 +51,56 @@ tasks.register("rebuildAll") {
 
 tasks.register("info") {
     group = "workspace"
-    description = "Show current build/publish versions"
+    description = "Show current build/publish versions (config-cache friendly)"
+
+    // Treat the config file as an optional input so config cache knows about it.
+    val cfgFile = layout.projectDirectory.file("build-config.properties")
+    inputs.file(cfgFile).optional()
+
+    // Helper to read a property from the config file text via a Provider
+    fun propFromFile(key: String) =
+        providers.fileContents(cfgFile).asText.map { text ->
+            val p = java.util.Properties()
+            if (text.isNotBlank()) {
+                java.io.StringReader(text).use { p.load(it) }
+            }
+            p.getProperty(key)
+        }
+
+    // Compose Providers with sensible fallbacks (env -> -P -> file -> default)
+    val versionName = providers.environmentVariable("VERSION_NAME")
+        .orElse(providers.gradleProperty("VERSION_NAME"))
+        .orElse(propFromFile("VERSION_NAME"))
+        .orElse("0.0.0")
+
+    val catalogVersion = providers.environmentVariable("CATALOG_VERSION")
+        .orElse(providers.gradleProperty("CATALOG_VERSION"))
+        .orElse(propFromFile("CATALOG_VERSION"))
+        .orElse(versionName)
+
+    val compileSdk = providers.gradleProperty("android.compileSdk")
+        .orElse(propFromFile("android.compileSdk"))
+        .orElse("36")
+
+    val minSdk = providers.gradleProperty("android.minSdk")
+        .orElse(propFromFile("android.minSdk"))
+        .orElse("24")
+
+    val targetSdk = providers.gradleProperty("android.targetSdk")
+        .orElse(propFromFile("android.targetSdk"))
+        .orElse("36")
+
+    val publishUrl = providers.gradleProperty("PUBLISH_URL")
+        .orElse(providers.environmentVariable("PUBLISH_URL"))
+        .orElse("not set (mavenLocal only)")
+
     doLast {
         println("📦 AppNow Build Logic Info")
-        val configFile = file("build-config.properties")
-        val properties = java.util.Properties()
-        
-        if (configFile.exists()) {
-            configFile.inputStream().use { properties.load(it) }
-        }
-        
-        println("  Catalog Version: ${System.getenv("CATALOG_VERSION") ?: findProperty("CATALOG_VERSION") ?: properties.getProperty("CATALOG_VERSION", "0.3.0")}")
-        println("  Plugin Version:  ${System.getenv("VERSION_NAME") ?: findProperty("VERSION_NAME") ?: properties.getProperty("VERSION_NAME", "0.3.0")}")
-        println("  Compile SDK:     ${properties.getProperty("android.compileSdk", "36")}")
-        println("  Min SDK:         ${properties.getProperty("android.minSdk", "24")}")
-        println("  Target SDK:      ${properties.getProperty("android.targetSdk", "36")}")
-        println("  Publish URL:     ${findProperty("PUBLISH_URL") ?: System.getenv("PUBLISH_URL") ?: "not set (mavenLocal only)"}")
+        println("  Catalog Version: ${catalogVersion.get()}")
+        println("  Plugin Version:  ${versionName.get()}")
+        println("  Compile SDK:     ${compileSdk.get()}")
+        println("  Min SDK:         ${minSdk.get()}")
+        println("  Target SDK:      ${targetSdk.get()}")
+        println("  Publish URL:     ${publishUrl.get()}")
     }
 }
