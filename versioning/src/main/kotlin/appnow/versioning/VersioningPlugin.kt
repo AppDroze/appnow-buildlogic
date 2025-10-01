@@ -4,7 +4,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
+import org.gradle.api.logging.Logging
 import javax.inject.Inject
+import java.io.IOException
 import java.util.Properties
 
 open class AppnowVersioningExtension @Inject constructor(objects: ObjectFactory) {
@@ -18,52 +20,63 @@ open class AppnowVersioningExtension @Inject constructor(objects: ObjectFactory)
 class VersioningPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val ext = project.extensions.create("appnowVersioning", AppnowVersioningExtension::class.java)
+        val logger = Logging.getLogger(VersioningPlugin::class.java)
+
+        // Load build-config.properties from workspace root or current root
         val props = Properties()
-
-        // Find the central file (works when applied inside included builds)
-        val fileCandidates = listOf(
-            project.rootProject.file("../build-config.properties"),
-            project.rootProject.file("build-config.properties")
-        )
-        try {
-            fileCandidates.firstOrNull { it.exists() }?.inputStream()?.use { props.load(it) }
-        } catch (e: Exception) {
-            project.logger.warn("⚠️ Failed to load build-config.properties: ${e.message}")
+        run {
+            val candidates = listOf(
+                project.rootProject.file("../build-config.properties"),
+                project.rootProject.file("build-config.properties")
+            )
+            val f = candidates.firstOrNull { it.exists() }
+            if (f != null) {
+                try {
+                    f.inputStream().use { props.load(it) }
+                } catch (e: IOException) {
+                    logger.warn("⚠️ appnow.versioning: failed to load ${f.absolutePath}: ${e.message}")
+                }
+            }
         }
 
-        fun env(k: String) = System.getenv(k)
-        fun gp(k: String) = project.findProperty(k)?.toString()
-        fun cfg(k: String) = props.getProperty(k)
+        fun fromEnv(k: String): String? = System.getenv(k)
+        fun fromProp(k: String): String? = project.findProperty(k)?.toString()
+        fun fromCfg(k: String): String? = props.getProperty(k)
 
-        fun v(key: String, fallback: String) =
-            env(key) ?: gp(key) ?: cfg(key) ?: fallback
+        fun str(key: String, fallback: String): String =
+            fromEnv(key) ?: fromProp(key) ?: fromCfg(key) ?: fallback
 
-        fun vi(key: String, fallback: Int) =
-            (env(key) ?: gp(key) ?: cfg(key))?.toIntOrNull() ?: fallback
+        fun int(key: String, fallback: Int): Int =
+            (fromEnv(key) ?: fromProp(key) ?: fromCfg(key))?.toIntOrNull() ?: fallback
 
-        ext.versionName.set(v("VERSION_NAME", "0.0.1"))
-        ext.catalogVersion.set(v("CATALOG_VERSION", ext.versionName.get()))
-        ext.compileSdk.set(vi("android.compileSdk", 36))
-        ext.minSdk.set(vi("android.minSdk", 24))
-        ext.targetSdk.set(vi("android.targetSdk", 36))
+        val versionName = str("VERSION_NAME", "0.0.1")
+        val catalogVersion = str("CATALOG_VERSION", versionName)
+        val compileSdk = int("android.compileSdk", 36)
+        val minSdk = int("android.minSdk", 24)
+        val targetSdk = int("android.targetSdk", 36)
+        val minSupportedMinSdk = int("MIN_SUPPORTED_MIN_SDK", 24)
 
-        // Export as Gradle properties so build scripts can read without referencing the class
+        // basic semver hint (non-fatal)
+        val semverRegex = Regex("""^\d+\.\d+\.\d+(-[A-Za-z0-9.\-]+)?$""")
+        if (!semverRegex.matches(versionName)) {
+            logger.warn("⚠️ appnow.versioning: VERSION_NAME='$versionName' is not semver-like (X.Y.Z[-qualifier])")
+        }
+
+        // export as extras
         project.extensions.extraProperties.apply {
-            set("appnow.versionName", ext.versionName.get())
-            set("appnow.catalogVersion", ext.catalogVersion.get())
-            set("android.compileSdk", ext.compileSdk.get().toString())
-            set("android.minSdk", ext.minSdk.get().toString())
-            set("android.targetSdk", ext.targetSdk.get().toString())
+            set("appnow.versionName", versionName)
+            set("appnow.catalogVersion", catalogVersion)
+            set("android.compileSdk", compileSdk.toString())
+            set("android.minSdk", minSdk.toString())
+            set("android.targetSdk", targetSdk.toString())
+            set("MIN_SUPPORTED_MIN_SDK", minSupportedMinSdk.toString())
         }
 
-        // If the project did not set a version, apply our resolved version.
-        // Gradle default is "unspecified".
+        // set project.version if unspecified
         val currentVersion = project.version.toString()
-        val resolved = project.extensions.extraProperties["appnow.versionName"]?.toString()
-
-        if (resolved != null && (currentVersion.equals("unspecified", ignoreCase = true) || currentVersion.isBlank())) {
-            project.version = resolved
-            project.logger.info("appnow.versioning: project.version set to $resolved")
+        if (currentVersion.equals("unspecified", ignoreCase = true) || currentVersion.isBlank()) {
+            project.version = versionName
+            logger.info("appnow.versioning: project.version set to $versionName")
         }
     }
 }

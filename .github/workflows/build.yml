@@ -24,7 +24,7 @@ jobs:
       - name: Build (exercise configuration cache)
         run: |
           ./gradlew \
-            :versioning:build :versioning:check \
+            :versioning:build :versioning:test :versioning:check \
             :catalog:generateCatalogAsToml \
-            :build-logic:build :build-logic:check \
+            :build-logic:build :build-logic:test :build-logic:check \
             --configuration-cache
