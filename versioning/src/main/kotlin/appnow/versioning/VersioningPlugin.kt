@@ -26,7 +26,11 @@ class VersioningPlugin : Plugin<Project> {
             project.rootProject.file("../build-config.properties"),
             project.rootProject.file("build-config.properties")
         )
-        fileCandidates.firstOrNull { it.exists() }?.inputStream()?.use { props.load(it) }
+        try {
+            fileCandidates.firstOrNull { it.exists() }?.inputStream()?.use { props.load(it) }
+        } catch (e: Exception) {
+            project.logger.warn("⚠️ Failed to load build-config.properties: ${e.message}")
+        }
 
         fun env(k: String) = System.getenv(k)
         fun gp(k: String) = project.findProperty(k)?.toString()

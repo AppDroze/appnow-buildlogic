@@ -22,11 +22,15 @@ jobs:
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Set versions
+      - name: Set versions from build-config.properties
         id: v
         run: |
-          echo "VERSION_NAME=0.1.0-SNAPSHOT" >> $GITHUB_OUTPUT
-          echo "CATALOG_VERSION=0.1.0-SNAPSHOT" >> $GITHUB_OUTPUT
+          VER=$(grep '^VERSION_NAME=' build-config.properties | cut -d= -f2)
+          if [ -z "$VER" ]; then
+            echo "VERSION_NAME missing in build-config.properties"; exit 1
+          fi
+          echo "VERSION_NAME=${VER}-SNAPSHOT" >> $GITHUB_OUTPUT
+          echo "CATALOG_VERSION=${VER}-SNAPSHOT" >> $GITHUB_OUTPUT
 
       # 1) publish versioning first (it provides the plugin used by others)
       - name: Build and Publish Versioning Plugin
