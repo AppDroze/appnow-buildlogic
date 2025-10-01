@@ -54,7 +54,7 @@ class VersioningPluginTest {
             android.targetSdk=34
         """)
 
-        // simulate -P by setting properties BEFORE applying plugin
+        // Create project and set properties that simulate -P flags
         val project = ProjectBuilder.builder()
             .withProjectDir(tmpDir)
             .build()
@@ -62,7 +62,7 @@ class VersioningPluginTest {
         // Set properties before plugin applies (simulates -P flags)
         project.extensions.extraProperties.apply {
             set("VERSION_NAME", "2.0.0")
-            set("CATALOG_VERSION", "2.0.0")  // explicitly set, otherwise defaults to VERSION_NAME
+            set("CATALOG_VERSION", "2.0.0")
             set("android.compileSdk", "36")
             set("android.minSdk", "26")
             set("android.targetSdk", "36")
@@ -71,9 +71,10 @@ class VersioningPluginTest {
         project.pluginManager.apply("appnow.versioning")
 
         // Verify plugin read the -P values (not file values)
-        val ext = project.extensions.findByName("appnowVersioning") as AppnowVersioningExtension
+        val ext = project.extensions.findByName("appnowVersioning") as? AppnowVersioningExtension
+        assertNotNull(ext, "appnowVersioning extension should be registered")
         assertEquals("2.0.0", ext.versionName.get())
-        assertEquals("2.0.0", ext.catalogVersion.get())  // catalogVersion defaults to versionName
+        assertEquals("2.0.0", ext.catalogVersion.get())
         assertEquals(36, ext.compileSdk.get())
         assertEquals(26, ext.minSdk.get())
         assertEquals(36, ext.targetSdk.get())
