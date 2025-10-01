@@ -55,5 +55,15 @@ class VersioningPlugin : Plugin<Project> {
             set("android.minSdk", ext.minSdk.get().toString())
             set("android.targetSdk", ext.targetSdk.get().toString())
         }
+
+        // If the project did not set a version, apply our resolved version.
+        // Gradle default is "unspecified".
+        val currentVersion = project.version.toString()
+        val resolved = project.extensions.extraProperties["appnow.versionName"]?.toString()
+
+        if (resolved != null && (currentVersion.equals("unspecified", ignoreCase = true) || currentVersion.isBlank())) {
+            project.version = resolved
+            project.logger.info("appnow.versioning: project.version set to $resolved")
+        }
     }
 }
