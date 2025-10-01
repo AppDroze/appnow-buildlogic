@@ -7,6 +7,7 @@ pluginManagement {
         google()
         mavenCentral()
     }
+    includeBuild("../versioning")
 }
 
 dependencyResolutionManagement {

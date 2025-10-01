@@ -1,15 +1,14 @@
-// Load centralized configuration
-apply(from = "build-config.gradle.kts")
-
 // Handy handles
 val BL  = gradle.includedBuild("build-logic")
 val CAT = gradle.includedBuild("catalog")
+val VER = gradle.includedBuild("versioning")
 
 tasks.register("cleanAll") {
     group = "workspace"
     dependsOn(
         BL.task(":clean"),
         CAT.task(":clean"),
+        VER.task(":clean"),
     )
 }
 
@@ -20,6 +19,7 @@ tasks.register("buildAll") {
         CAT.task(":generateCatalogAsToml"),
         BL.task(":build"),
         BL.task(":check"),
+        VER.task(":build"),
     )
 }
 
@@ -29,6 +29,7 @@ tasks.register("publishLocal") {
     dependsOn(
         CAT.task(":publishToMavenLocal"),
         BL.task(":publishToMavenLocal"),
+        VER.task(":publishToMavenLocal"),
     )
 }
 
@@ -38,6 +39,7 @@ tasks.register("publishRemote") {
     dependsOn(
         CAT.task(":publish"),
         BL.task(":publish"),
+        VER.task(":publish"),
     )
 }
 
@@ -51,6 +53,7 @@ tasks.register("info") {
     group = "workspace"
     description = "Show current build/publish versions"
     doLast {
+        println("📦 AppNow Build Logic Info")
         val configFile = file("build-config.properties")
         val properties = java.util.Properties()
         
@@ -58,7 +61,6 @@ tasks.register("info") {
             configFile.inputStream().use { properties.load(it) }
         }
         
-        println("📦 AppNow Build Logic Info")
         println("  Catalog Version: ${System.getenv("CATALOG_VERSION") ?: findProperty("CATALOG_VERSION") ?: properties.getProperty("CATALOG_VERSION", "0.3.0")}")
         println("  Plugin Version:  ${System.getenv("VERSION_NAME") ?: findProperty("VERSION_NAME") ?: properties.getProperty("VERSION_NAME", "0.3.0")}")
         println("  Compile SDK:     ${properties.getProperty("android.compileSdk", "36")}")

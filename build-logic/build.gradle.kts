@@ -1,22 +1,12 @@
-import java.util.Properties
-
 plugins {
+    id("appnow.versioning")
     `kotlin-dsl`
     `java-gradle-plugin`
     `maven-publish`
 }
 
 group = providers.gradleProperty("GROUP").getOrElse("com.appnow.buildlogic")
-
-// Version precedence: ENV → -P → build-config.properties → default
-val cfgFile = rootDir.resolve("..").resolve("build-config.properties")
-val props = Properties().apply {
-    if (cfgFile.exists()) cfgFile.inputStream().use { load(it) }
-}
-version = providers.environmentVariable("VERSION_NAME")
-    .orElse(providers.gradleProperty("VERSION_NAME"))
-    .orElse(props.getProperty("VERSION_NAME") ?: "")
-    .getOrElse("0.3.0")
+version = providers.gradleProperty("appnow.versionName").getOrElse("0.0.1")
 
 repositories {
     mavenLocal()
@@ -66,16 +56,13 @@ gradlePlugin {
 
 publishing {
     repositories {
-        val publishUrl = (findProperty("PUBLISH_URL") as String?)
-            ?: System.getenv("PUBLISH_URL")
+        val publishUrl = findProperty("PUBLISH_URL") as String? ?: System.getenv("PUBLISH_URL")
         if (publishUrl != null) {
             maven {
                 url = uri(publishUrl)
                 credentials {
-                    username = (findProperty("MAVEN_USER") as String?)
-                        ?: System.getenv("GITHUB_ACTOR").orEmpty()
-                    password = (findProperty("MAVEN_TOKEN") as String?)
-                        ?: System.getenv("GITHUB_TOKEN").orEmpty()
+                    username = findProperty("MAVEN_USER") as String? ?: System.getenv("GITHUB_ACTOR") ?: ""
+                    password = findProperty("MAVEN_TOKEN") as String? ?: System.getenv("GITHUB_TOKEN") ?: ""
                 }
             }
         }

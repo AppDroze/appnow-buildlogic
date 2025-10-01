@@ -97,6 +97,13 @@ android.targetSdk=35
 app.applicationId=com.yourcompany.yourapp
 app.versionCode=2
 app.versionName=2.0.0
+
+# Configure KMP iOS targets (for appnow.kmp.library)
+# Disable iOS entirely
+kmp.enableIos=false
+
+# Or, customize iOS targets (default: arm64,simulatorArm64)
+kmp.ios.targets=arm64,simulatorArm64,x64
 ```
 
 ### 5. Local Development
