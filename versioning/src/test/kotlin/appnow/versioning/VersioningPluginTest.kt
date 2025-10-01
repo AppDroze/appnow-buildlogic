@@ -26,7 +26,7 @@ class VersioningPluginTest {
 
         project.pluginManager.apply("appnow.versioning")
 
-        // extension values
+        // Verify plugin extension values
         val ext = project.extensions.findByName("appnowVersioning") as AppnowVersioningExtension
         assertEquals("9.9.9", ext.versionName.get())
         assertEquals("9.9.9", ext.catalogVersion.get())
@@ -34,12 +34,13 @@ class VersioningPluginTest {
         assertEquals(25, ext.minSdk.get())
         assertEquals(35, ext.targetSdk.get())
 
-        // exported gradle properties
-        assertEquals("9.9.9", project.findProperty("appnow.versionName"))
-        assertEquals("9.9.9", project.findProperty("appnow.catalogVersion"))
-        assertEquals("35", project.findProperty("android.compileSdk"))
-        assertEquals("25", project.findProperty("android.minSdk"))
-        assertEquals("35", project.findProperty("android.targetSdk"))
+        // Verify exported to extraProperties
+        val extras = project.extensions.extraProperties
+        assertEquals("9.9.9", extras.get("appnow.versionName"))
+        assertEquals("9.9.9", extras.get("appnow.catalogVersion"))
+        assertEquals("35", extras.get("android.compileSdk"))
+        assertEquals("25", extras.get("android.minSdk"))
+        assertEquals("35", extras.get("android.targetSdk"))
     }
 
     @Test
@@ -77,12 +78,13 @@ class VersioningPluginTest {
         assertEquals(26, ext.minSdk.get())
         assertEquals(36, ext.targetSdk.get())
 
-        // Verify plugin exported the values
-        assertEquals("2.0.0", project.findProperty("appnow.versionName"))
-        assertEquals("2.0.0", project.findProperty("appnow.catalogVersion"))
-        assertEquals("36", project.findProperty("android.compileSdk"))
-        assertEquals("26", project.findProperty("android.minSdk"))
-        assertEquals("36", project.findProperty("android.targetSdk"))
+        // Verify plugin exported the values to extraProperties
+        val extras = project.extensions.extraProperties
+        assertEquals("2.0.0", extras.get("appnow.versionName"))
+        assertEquals("2.0.0", extras.get("appnow.catalogVersion"))
+        assertEquals("36", extras.get("android.compileSdk"))
+        assertEquals("26", extras.get("android.minSdk"))
+        assertEquals("36", extras.get("android.targetSdk"))
         
         tmpDir.deleteRecursively()
     }
@@ -102,12 +104,13 @@ class VersioningPluginTest {
         assertEquals(24, ext.minSdk.get())
         assertEquals(36, ext.targetSdk.get())
 
-        // exported defaults present
-        assertEquals("0.0.1", project.findProperty("appnow.versionName"))
-        assertEquals("0.0.1", project.findProperty("appnow.catalogVersion"))
-        assertEquals("36", project.findProperty("android.compileSdk"))
-        assertEquals("24", project.findProperty("android.minSdk"))
-        assertEquals("36", project.findProperty("android.targetSdk"))
+        // Verify exported defaults to extraProperties
+        val extras = project.extensions.extraProperties
+        assertEquals("0.0.1", extras.get("appnow.versionName"))
+        assertEquals("0.0.1", extras.get("appnow.catalogVersion"))
+        assertEquals("36", extras.get("android.compileSdk"))
+        assertEquals("24", extras.get("android.minSdk"))
+        assertEquals("36", extras.get("android.targetSdk"))
     }
 }
 
