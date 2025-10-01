@@ -31,6 +31,16 @@ jobs:
           echo "VERSION_NAME=$VERSION" >> $GITHUB_OUTPUT
           echo "CATALOG_VERSION=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Build and Publish Versioning Plugin
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_URL: https://maven.pkg.github.com/${{ github.repository }}
+          VERSION_NAME: ${{ steps.v.outputs.VERSION_NAME }}
+          CATALOG_VERSION: ${{ steps.v.outputs.CATALOG_VERSION }}
+        run: |
+          ./gradlew :versioning:build :versioning:publish
+
       - name: Build and Publish Catalog
         env:
           GITHUB_ACTOR: ${{ github.actor }}
@@ -39,7 +49,7 @@ jobs:
           VERSION_NAME: ${{ steps.v.outputs.VERSION_NAME }}
           CATALOG_VERSION: ${{ steps.v.outputs.CATALOG_VERSION }}
         run: |
-          ./gradlew -p catalog build publish
+          ./gradlew :catalog:build :catalog:publish
 
       - name: Build and Publish Plugins
         env:
@@ -49,4 +59,4 @@ jobs:
           VERSION_NAME: ${{ steps.v.outputs.VERSION_NAME }}
           CATALOG_VERSION: ${{ steps.v.outputs.CATALOG_VERSION }}
         run: |
-          ./gradlew -p build-logic build publish
+          ./gradlew :build-logic:build :build-logic:publish
