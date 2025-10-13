@@ -45,3 +45,7 @@ Thumbs.db
 # Temporary files
 *~
 .tmp
+
+# Xcode user data
+*.xcuserstate
+xcuserdata/
