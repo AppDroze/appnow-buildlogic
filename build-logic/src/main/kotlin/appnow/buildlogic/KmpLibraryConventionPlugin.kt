@@ -13,6 +13,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("org.jetbrains.kotlin.multiplatform")
         pluginManager.apply("com.android.library")
+        pluginManager.apply("maven-publish")
 
         // SDK properties with fallbacks from versioning plugin
         val compileSdkVersion = providers.gradleProperty("android.compileSdk").map(String::toInt).orElse(36).get()

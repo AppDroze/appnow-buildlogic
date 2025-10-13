@@ -32,9 +32,8 @@ class AndroidAppConventionPlugin : Plugin<Project> {
 
         // SDK properties with fallbacks from versioning plugin
         val compileSdkVersion = providers.gradleProperty("android.compileSdk").map(String::toInt).orElse(36).get()
-        val minSdkVersion = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24).get()
         val targetSdkVersion = providers.gradleProperty("android.targetSdk").map(String::toInt).orElse(36).get()
-        
+
         val minSdkValue = providers.gradleProperty("android.minSdk").map(String::toInt).orElse(24).get()
         val minSupportedMinSdk = providers.gradleProperty("appnow.minSupportedMinSdk")
             .map(String::toInt)

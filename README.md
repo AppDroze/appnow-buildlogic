@@ -77,7 +77,53 @@ Builds fail if `android.minSdk < appnow.minSupportedMinSdk`.
 appnow-buildlogic/
 ├── build-logic/               # Convention plugins
 ├── catalog/                   # Version catalog
+├── samples/                   # Sample projects
 ├── settings.gradle.kts        # Workspace config
 └── build.gradle.kts          # Workspace tasks
 ```
-# Trigger GitHub Actions
+
+## Samples
+
+The `samples/` directory demonstrates end-to-end usage of the build logic:
+
+- **showcase-lib**: KMP library (Android + iOS) using `appnow.kmp.library`
+- **android-app**: Android app consuming the KMP library
+- **ios-spm**: Swift Package Manager wrapper for iOS consumption
+
+### Build & Run Samples
+
+```bash
+# 1. Build and publish build-logic locally
+./gradlew publishLocal
+
+# 2. Build the KMP library
+cd samples
+./gradlew :showcase-lib:build
+
+# 3. Assemble Android app
+./gradlew :android-app:assembleDebug
+
+# 4. Publish library to mavenLocal
+./gradlew :showcase-lib:publishToMavenLocal
+
+# 5. Generate XCFramework for iOS
+./gradlew :showcase-lib:assembleXCFramework
+```
+
+### iOS Integration
+
+After building the XCFramework:
+
+1. Open your iOS project in Xcode
+2. File → Add Package → Add Local...
+3. Select `samples/ios-spm/`
+4. Import in Swift: `import ShowcaseLib`
+
+The XCFramework will be at:
+```
+samples/showcase-lib/build/XCFrameworks/release/ShowcaseLib.xcframework
+```
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
