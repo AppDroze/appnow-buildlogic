@@ -12,6 +12,7 @@ androidx-lifecycle  = "2.9.4"       # JetBrains' KMP-ready Lifecycle artifacts
 
 # KotlinX
 coroutines          = "1.10.2"
+datetime            = "0.6.1"
 
 # Ecosystem
 decompose           = "3.3.0"
@@ -59,6 +60,7 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 
 # KotlinX
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-datetime        = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 
 # Decompose
 decompose-core                  = { module = "com.arkivanov.decompose:decompose",          version.ref = "decompose" }

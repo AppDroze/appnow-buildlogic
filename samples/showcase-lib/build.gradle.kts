@@ -13,7 +13,9 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                // Add shared deps here if needed
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.koin.core)
+                implementation(libs.kotlinx.datetime)
             }
         }
         val androidMain by getting
