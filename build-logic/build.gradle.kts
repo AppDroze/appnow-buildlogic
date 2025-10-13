@@ -68,6 +68,17 @@ publishing {
         pom {
             name.set("AppNow Build Logic")
             description.set("Convention plugins for AppNow projects")
+            licenses {
+                license {
+                    name.set("Apache License 2.0")
+                    url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                }
+            }
+            scm {
+                url.set("https://github.com/AppDroze/appnow-buildlogic")
+                connection.set("scm:git:https://github.com/AppDroze/appnow-buildlogic.git")
+                developerConnection.set("scm:git:https://github.com/AppDroze/appnow-buildlogic.git")
+            }
         }
     }
 }
